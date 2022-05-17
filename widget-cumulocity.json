@@ -1,0 +1,18 @@
+{
+    "name": "Ticketing Integration Setup Widget",
+    "contextPath": "c8y-ticketing-integration-setup-widget",
+    "key": "c8y-ticketing-integration-setup-widget-key",
+    "contentSecurityPolicy": "default-src 'self'",
+    "description": "Configure to.",
+    "icon": {
+        "class": "fa fw fa-database"
+    },
+    "manifest": {
+        "noAppSwitcher": true,
+        "requiredPlatformVersion": "“>=1010.0.4",
+        "version":"1.0.1",
+        "author":"Software AG, Global Presales",
+        "description":"Configure to.",
+        "license": "Apache 2.0"
+    }
+}

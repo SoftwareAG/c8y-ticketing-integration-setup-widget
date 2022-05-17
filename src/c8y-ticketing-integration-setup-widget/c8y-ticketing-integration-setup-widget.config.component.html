@@ -1,0 +1,39 @@
+<div class="row">
+    <div class="col-lg-4">  
+        <div class="form-group">
+            <label>Platform</label>
+            <select class="form-control" [(ngModel)]="tpConfig.name">
+                <option value="AGILEAPPS">webMethods AgileApps</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="form-group">
+            <label>Tenant url</label>
+            <input type="text" class="form-control" [(ngModel)]="tpConfig.tenantUrl" />
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" class="form-control" [(ngModel)]="tpConfig.username" />
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" [(ngModel)]="tpConfig.password" />
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="form-group">
+            <label>Account id</label>
+            <input type="text" class="form-control" [(ngModel)]="tpConfig.accountId" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <button class="btn btn-default" style="margin-top: 22px;" (click)="saveTPConfig()">Save connection</button>
+    </div>
+</div>
