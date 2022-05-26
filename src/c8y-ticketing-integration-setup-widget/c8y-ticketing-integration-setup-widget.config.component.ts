@@ -207,14 +207,13 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         this.updateConfig();
     }
 
-    public updateChartColor(event, index) {
-        this.widgetConfig.chartColors[index] = event;
-        this.updateConfig();
-    }
-
     public updateConfig() {
         _.set(this.config, 'customwidgetdata', this.widgetConfig);
-      }
+    }
+
+    trackByFn(index, item) {
+        return index;  
+    }
 
     ngOnDestroy(): void {
         //unsubscribe from observables here

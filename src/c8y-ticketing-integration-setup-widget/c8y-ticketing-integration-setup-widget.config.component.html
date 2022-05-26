@@ -103,10 +103,10 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-2" *ngFor="let chartColor of widgetConfig.chartColors; let i=index">
+                <div class="col-lg-2" *ngFor="let chartColor of widgetConfig.chartColors; let i=index; trackBy: trackByFn">
                     <div class="form-group">
                         <label>Chart color #{{i+1}}</label>
-                        <input type="color" class="form-control" [(ngModel)]="chartColor" (ngModelChange)="updateChartColor($event, i)"/>
+                        <input type="color" class="form-control" [(ngModel)]="widgetConfig.chartColors[i]" (change)="updateConfig()"/>
                     </div>
                 </div>
             </div>
