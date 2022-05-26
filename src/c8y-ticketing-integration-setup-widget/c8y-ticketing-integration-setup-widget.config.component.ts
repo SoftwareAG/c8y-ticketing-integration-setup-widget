@@ -20,6 +20,7 @@ import { IFetchOptions, IFetchResponse } from '@c8y/client';
 import { AlertService } from '@c8y/ngx-components';
 import { FetchClient } from '@c8y/ngx-components/api';
 import * as _ from 'lodash';
+import { DAMapping } from './da-mapping';
 import { TPConfig } from './tp-config';
 
 @Component({
@@ -31,19 +32,35 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
 
     @Input() config: any = {};
 
+    public widgetConfig = {
+        ticketsPageSize: 5,
+        daMappingsPageSize: 5,
+        chartColors: ["#1776bf"]
+    };
+
     public tpConfig: TPConfig = {
         name: '',
         tenantUrl: '',
         username: '',
         password: '',
-        accountId: ''
+        accountId: '',
+        alarmSubscription: false
     };
-    private tpConfigExists: boolean = false;
+
+    public tpConfigSaved: boolean = false;
+    
+    public daMappings: DAMapping[] = [];
 
     constructor(private fetchClient: FetchClient, private alertService: AlertService) {}
 
     ngOnInit(): void {
         try {
+             // Editing an existing widget
+            if(_.has(this.config, 'customwidgetdata')) {
+                this.widgetConfig = _.get(this.config, 'customwidgetdata');
+            } else { // Adding a new widget
+                _.set(this.config, 'customwidgetdata', this.widgetConfig);
+            }
             this.initialiseTPConfig();
         } catch(e) {
             this.alertService.danger("Ticketing Integration Setup Widget Config - ngOnInit()", e);
@@ -56,7 +73,14 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
             if(resp.status === 200) {
                 resp.json().then((jsonResp) => {
                     this.tpConfig = jsonResp;
-                    this.tpConfigExists = true;         
+
+                    this.tpConfigSaved = true;
+
+                    // only fetch device alarm mappings if alarmSubscription is true
+                    if(this.tpConfig.alarmSubscription === true) {
+                        this.initialiseDAMappings();
+                    }
+
                 }).catch((err)=> {
                     this.alertService.danger("Ticketing Integration Setup Widget Config - Error accessing tpConfig response body as JSON", err);
                 });
@@ -72,8 +96,44 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         });
     }
 
+    private initialiseDAMappings(): void {
+        let daMappingsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/damappings");
+        daMappingsFetchClient.then((resp: IFetchResponse) => {
+            if(resp.status === 200) {
+                resp.json().then((jsonResp) => {
+                    this.daMappings = jsonResp;
+                }).catch((err) => {
+                    console.log("Ticketing Integration Setup Widget - Error accessing daMappings response body as JSON: "+err);
+                });
+            } else {
+                console.log("Ticketing Integration Setup Widget - Unable to fetch daMappings: "+resp.status);
+            }
+        }).catch((err) => {
+            console.log("Ticketing Integration Setup Widget - Error accessing dpMappings fetchClient: "+err);
+        });
+    }
+
+    public isTPConfigValid(): boolean {
+        return this.tpConfig.name !== undefined && this.tpConfig.name !== null && this.tpConfig.name !== ""
+        && this.tpConfig.password !== undefined && this.tpConfig.password !== null && this.tpConfig.password !== ""
+        && this.tpConfig.username !== undefined && this.tpConfig.username !== null && this.tpConfig.username !== ""
+        && this.tpConfig.tenantUrl !== undefined && this.tpConfig.tenantUrl !== null && this.tpConfig.tenantUrl !== ""
+        && this.tpConfig.accountId !== undefined && this.tpConfig.accountId !== null && this.tpConfig.accountId !== ""
+    }
+
+    public addDAMapping() {
+        this.daMappings.push({
+            deviceId: '',
+            alarmType: ''
+        });
+    }
+
+    public removeDAMapping(index: number) {
+        this.daMappings.splice(index, 1);
+    }
+
     public saveTPConfig(): void {
-        if(this.tpConfigExists) {
+        if(this.tpConfigSaved) {
             this.updateTPConfig();
         } else {
             this.createTPConfig();
@@ -90,7 +150,7 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         let tpConfigFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/tpconfig", fetchOptions);
         tpConfigFetchClient.then((resp: IFetchResponse) => {
             if(resp.status === 201) {
-                this.tpConfigExists = true;
+                this.tpConfigSaved = true;
                 this.alertService.success("Configuration saved successfully.");
             } else {
                 this.alertService.danger("Error saving configuration.", resp.status.toString());
@@ -118,6 +178,43 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
             this.alertService.danger("Error updating configuration.", err);
         });
     }
+
+    public saveDAMappings() {
+        const fetchOptions: IFetchOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(this.daMappings)
+        };
+        let daMappingsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/damappings", fetchOptions);
+        daMappingsFetchClient.then((resp: IFetchResponse) => {
+            if(resp.status === 200) {
+                this.alertService.success("Mappings saved successfully.");
+            } else {
+                this.alertService.danger("Error saving mappings.", resp.status.toString());
+            }
+        }).catch((err) => {
+            this.alertService.danger("Error saving mappings.", err.toString());
+        });
+    }
+
+    public addChartColor(): void {
+        this.widgetConfig.chartColors.push("#1776BF");
+        this.updateConfig();
+    }
+
+    public removeChartColor(): void {
+        this.widgetConfig.chartColors.pop();
+        this.updateConfig();
+    }
+
+    public updateChartColor(event, index) {
+        this.widgetConfig.chartColors[index] = event;
+        this.updateConfig();
+    }
+
+    public updateConfig() {
+        _.set(this.config, 'customwidgetdata', this.widgetConfig);
+      }
 
     ngOnDestroy(): void {
         //unsubscribe from observables here

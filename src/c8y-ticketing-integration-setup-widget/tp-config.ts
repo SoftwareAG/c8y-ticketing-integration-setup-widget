@@ -4,4 +4,5 @@ export interface TPConfig {
     password: string;
     tenantUrl: string;
     accountId: string;
+    alarmSubscription: boolean;
 }

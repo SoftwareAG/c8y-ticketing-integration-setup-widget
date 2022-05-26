@@ -24,9 +24,10 @@ import { CumulocityTicketingIntegrationSetupWidgetConfig } from "./c8y-ticketing
 import { CumulocityTicketingIntegrationSetupWidget } from "./c8y-ticketing-integration-setup-widget.component";
 import { NgModule } from "@angular/core";
 import { HttpClientModule } from "@angular/common/http";
+import { ChartsModule } from "ng2-charts";
 
 @NgModule({
-    imports: [CoreModule, HttpClientModule],
+    imports: [CoreModule, HttpClientModule, ChartsModule],
     declarations: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig],
     entryComponents: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig],
     providers: [

@@ -28,7 +28,10 @@
         "@c8y/ngx-components": "1010.0.8",
         "@c8y/style": "1010.0.8",
         "angular": "1.6.9",
+        "chart.js": "2.9.4",
         "core-js": "3.4.0",
+        "ng2-charts": "2.4.2",
+        "ngx-bootstrap": "5.6.2",
         "rxjs": "6.4.0",
         "url-search-params-polyfill": "6.0.0",
         "zone.js": "0.9.1"

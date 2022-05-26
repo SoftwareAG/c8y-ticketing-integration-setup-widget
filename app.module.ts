@@ -10,6 +10,8 @@ import { ReportsModule } from "@c8y/ngx-components/reports";
 import { SensorPhoneModule } from "@c8y/ngx-components/sensor-phone";
 import { CumulocityTicketingIntegrationSetupWidget } from './src/c8y-ticketing-integration-setup-widget/c8y-ticketing-integration-setup-widget.component';
 import { CumulocityTicketingIntegrationSetupWidgetConfig } from './src/c8y-ticketing-integration-setup-widget/c8y-ticketing-integration-setup-widget.config.component';
+import { ChartsModule, ThemeService } from "ng2-charts";
+import { PaginationModule } from "ngx-bootstrap/pagination";
 
 @NgModule({
   imports: [
@@ -24,6 +26,8 @@ import { CumulocityTicketingIntegrationSetupWidgetConfig } from './src/c8y-ticke
         CockpitDashboardModule,
         SensorPhoneModule,
         UpgradeModule,
+        ChartsModule,
+        PaginationModule
   ],
   declarations: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig],
   entryComponents: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig],
@@ -37,10 +41,15 @@ import { CumulocityTicketingIntegrationSetupWidgetConfig } from './src/c8y-ticke
         description: 'To configure',
         component: CumulocityTicketingIntegrationSetupWidget,
         configComponent: CumulocityTicketingIntegrationSetupWidgetConfig,
-        previewImage: require("@widget-assets/img-preview.png")
+        previewImage: require("@widget-assets/img-preview.png"),
+        data: {
+            ng1: {
+                options: { noDeviceTarget: true, deviceTargetNotRequired: true },
+            },
+        },
       }
     ]
-  }],
+  }, ThemeService],
 })
 export class AppModule extends HybridAppModule {
   constructor(protected upgrade: NgUpgradeModule) {

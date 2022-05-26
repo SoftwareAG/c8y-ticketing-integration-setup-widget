@@ -20,13 +20,17 @@
  */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { IFetchOptions, IFetchResponse } from '@c8y/client';
+import { IFetchResponse } from '@c8y/client';
 import { AlertService } from '@c8y/ngx-components';
 import { FetchClient } from '@c8y/ngx-components/api';
+import { Chart, ChartOptions, ChartType } from 'chart.js';
 import * as _ from 'lodash';
 import { DAMapping } from './da-mapping';
+import { MicroserviceHealth } from './microservice-health';
+import { Ticket } from './ticket';
 import { TPConfig } from './tp-config';
-
+import { SingleDataSet, Label } from 'ng2-charts';
+import { PageChangedEvent } from 'ngx-bootstrap/pagination';
 
 @Component({
     selector: "lib-c8y-ticketing-integration-setup-widget",
@@ -42,10 +46,29 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         tenantUrl: '',
         username: '',
         password: '',
-        accountId: ''
+        accountId: '',
+        alarmSubscription: false
     };
-
     public daMappings: DAMapping[] = [];
+    public paginatedDAMappings: DAMapping[] = [];
+    public totalDAMappingsPerPage: number = 1;
+
+    public tickets: Ticket[] = [];
+    public paginatedTickets: Ticket[] = [];
+    public totalTicketsPerPage: number = 1;
+
+    private countByStatusLabels: string[] = [];
+    private countByStatusDatapoints: number[] = []
+
+    private countByPriorityLabels: string[] = [];
+    private countByPriorityDatapoints: number[]= [];
+
+    private chartColors = [];
+
+
+    public microserviceHealth: MicroserviceHealth = {
+        status: "Checking..."
+    };
 
     constructor(private fetchClient: FetchClient, private alertService: AlertService) {
     }
@@ -56,6 +79,12 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
 
     private initialise(): void {
         try {
+            if(this.config.customwidgetdata !== undefined) {
+                this.totalTicketsPerPage = this.config.customwidgetdata.ticketsPageSize;
+                this.totalDAMappingsPerPage = this.config.customwidgetdata.daMappingsPageSize;
+                this.chartColors = this.config.customwidgetdata.chartColors;
+            }
+            this.getMicroserviceHealth();
             this.initialiseTPConfig();
         } catch(err) {
             console.log("Ticketing Integration Setup Widget - initialise() "+err);
@@ -67,8 +96,11 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             tpConfigFetchClient.then((resp: IFetchResponse) => {
                 if(resp.status === 200) {
                     resp.json().then((jsonResp) => {
-                        this.tpConfig = jsonResp;         
-                        this.initialiseDAMappings();
+                        this.tpConfig = jsonResp;
+                        if(this.tpConfig.alarmSubscription) {
+                            this.initialiseDAMappings();
+                        }
+                        this.getAllTickets();
                     }).catch((err)=> {
                         console.log("Ticketing Integration Setup Widget - Error accessing tpConfig response body as JSON: "+err);
                     });
@@ -90,6 +122,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             if(resp.status === 200) {
                 resp.json().then((jsonResp) => {
                     this.daMappings = jsonResp;
+                    this.paginatedDAMappings = jsonResp.slice(0, this.totalDAMappingsPerPage);
                 }).catch((err) => {
                     console.log("Ticketing Integration Setup Widget - Error accessing daMappings response body as JSON: "+err);
                 });
@@ -99,44 +132,134 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         }).catch((err) => {
             console.log("Ticketing Integration Setup Widget - Error accessing dpMappings fetchClient: "+err);
         });
-    }
-    
-
-    public isTPConfigValid(): boolean {
-        return this.tpConfig.name !== undefined && this.tpConfig.name !== null && this.tpConfig.name !== ""
-        && this.tpConfig.password !== undefined && this.tpConfig.password !== null && this.tpConfig.password !== ""
-        && this.tpConfig.username !== undefined && this.tpConfig.username !== null && this.tpConfig.username !== ""
-        && this.tpConfig.tenantUrl !== undefined && this.tpConfig.tenantUrl !== null && this.tpConfig.tenantUrl !== ""
-        && this.tpConfig.accountId !== undefined && this.tpConfig.accountId !== null && this.tpConfig.accountId !== ""
-    }
-
-    public addDAMapping() {
-        this.daMappings.push({
-            deviceId: '',
-            alarmType: ''
-        });
-    }
-
-    public removeDAMapping(index: number) {
-        this.daMappings.splice(index, 1);
+        
     }
    
-    public saveDAMappings() {
-        const fetchOptions: IFetchOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.daMappings)
-        };
-        let daMappingsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/damappings", fetchOptions);
-        daMappingsFetchClient.then((resp: IFetchResponse) => {
+    
+    private getAllTickets(): void {
+        let ticketsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/tickets");
+        ticketsFetchClient.then((resp) => {
             if(resp.status === 200) {
-                this.alertService.success("Mappings saved successfully.");
-            } else {
-                this.alertService.danger("Error saving mappings.", resp.status.toString());
+                resp.json().then((tickets: Ticket[]) => {
+                    
+                    this.tickets = tickets;
+                    this.paginatedTickets = tickets.slice(0, this.totalTicketsPerPage);
+
+                    tickets.forEach((ticket) => {
+                        let statusFoundIndex = this.findEntryInStatus(ticket.status);
+                        if(statusFoundIndex === -1) {
+                            this.countByStatusLabels.push(ticket.status);
+                            this.countByStatusDatapoints.push(1);
+                        } else {
+                            this.countByStatusDatapoints[statusFoundIndex] = this.countByStatusDatapoints[statusFoundIndex] + 1;
+                        }
+
+                        let priorityFoundIndex = this.findEntryInPriority(ticket.priority);
+                        if(priorityFoundIndex === -1) {
+                            this.countByPriorityLabels.push(ticket.priority);
+                            this.countByPriorityDatapoints.push(1);
+                        } else {
+                            this.countByPriorityDatapoints[priorityFoundIndex] = this.countByPriorityDatapoints[priorityFoundIndex] + 1;
+                        }
+                    });
+                   
+                    this.showPriorityChart();
+                    this.showStatusChart();
+                }).catch((err) => {
+                    console.log("Error processing jsonResp");
+                });
             }
         }).catch((err) => {
-            this.alertService.danger("Error saving mappings.", err.toString());
+            console.log("Error fetching tickets");
         });
+    }
+
+    private findEntryInStatus(status: string): number {
+        let foundIndex: number = -1;
+        for(let i=0; i<this.countByStatusLabels.length; i++) {
+            if(status === this.countByStatusLabels[i]) {
+                foundIndex = i;
+                break;
+            }
+        }
+        return foundIndex;
+    }
+
+    private findEntryInPriority(priority: string): number {
+        let foundIndex: number = -1;
+        for(let i=0; i<this.countByPriorityLabels.length; i++) {
+            if(priority === this.countByPriorityLabels[i]) {
+                foundIndex = i;
+                break;
+            }
+        }
+        return foundIndex;
+    }
+
+    public getMicroserviceHealth(): void {
+        let healthFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/health")
+        healthFetchClient.then((resp: IFetchResponse) => {
+            if(resp.status === 200) {
+                resp.json().then((jsonResp) => {
+                    this.microserviceHealth = jsonResp;
+                });
+            } else if(resp.status === 404) {
+                this.microserviceHealth.status = "Unavailable";
+            } else {
+                console.log("Error checking microservice health..."+resp.status);
+            }
+        }).catch((err) => {
+            console.log("Error checking microservice health..."+err);
+        });
+    }
+    
+    private showPriorityChart() {
+        new Chart("priorityChart", {
+            type: "pie",
+            data: {
+                labels: this.countByPriorityLabels,
+                datasets: [{
+                    data: this.countByPriorityDatapoints,
+                    backgroundColor: this.chartColors
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                }
+            }
+        });
+    }
+
+    private showStatusChart() {
+        new Chart("statusChart", {
+            type: "pie",
+            data: {
+                labels: this.countByStatusLabels,
+                datasets: [{
+                    data: this.countByStatusDatapoints,
+                    backgroundColor: this.chartColors
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                }
+            }
+        });
+    }
+
+
+    public ticketsPageChanged(event: PageChangedEvent): void {
+        const startItem = (event.page - 1) * this.totalTicketsPerPage;
+        const endItem = event.page * this.totalTicketsPerPage;
+        this.paginatedTickets = this.tickets.slice(startItem, endItem);
+    }
+
+    public daMappingsPageChanged(event: PageChangedEvent): void {
+        const startItem = (event.page - 1) * this.totalDAMappingsPerPage;
+        const endItem = event.page * this.totalDAMappingsPerPage;
+        this.paginatedDAMappings = this.daMappings.slice(startItem, endItem);
     }
 
 }
