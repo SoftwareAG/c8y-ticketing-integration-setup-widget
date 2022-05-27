@@ -10,7 +10,7 @@
         </div>
         <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
             <p>
-                <b>Heap memory </b><span>{{microserviceHealth.components.diskSpace.status}}</span>
+                <b>Disk space </b><span>{{microserviceHealth.components.diskSpace.status}}</span>
             </p>
         </div>
         <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
@@ -20,12 +20,12 @@
         </div>
         <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
             <p>
-                <b>Heap memory </b><span>{{microserviceHealth.components.nonHeapMemory.status}}</span>
+                <b>Non-heap memory </b><span>{{microserviceHealth.components.nonHeapMemory.status}}</span>
             </p>
         </div>
     </div>
     <div class="d-flex flex-wrap">
-        <div style="margin-right: 40px;">
+        <div style="margin-right: 40px; margin-bottom: 20px;">
             <h4>All tickets</h4>
             <table class="table table-striped c8y-table-responsive" style="margin-bottom: 10px;">
                 <thead>
@@ -35,6 +35,8 @@
                         <th>Description</th>
                         <th>Creation date</th>
                         <th>Last updated date</th>
+                        <th>Status</th>
+                        <th>Priority</th>
                         <th>Alarm id</th>
                         <th>Device id</th>
                     </tr>
@@ -46,6 +48,8 @@
                         <td>{{ticket.description}}</td>
                         <td>{{ticket.creationDate}}</td>
                         <td>{{ticket.lastUpdateDate}}</td>
+                        <td>{{ticket.status}}</td>
+                        <td>{{ticket.priority}}</td>
                         <td>{{ticket.alarmId}}</td>
                         <td>{{ticket.deviceId}}</td>
                     </tr>
@@ -64,7 +68,7 @@
                 <canvas id="statusChart"></canvas>
             </div>
         </div>
-        <div style="margin-right: 40px;">
+        <div style="margin-right: 40px; margin-bottom: 20px;">
             <h4>Device Alarm mappings</h4>
             <table class="table table-striped c8y-table-responsive" style="margin-bottom: 10px;">
                 <thead>
@@ -84,21 +88,4 @@
             nextText=" " [itemsPerPage]="totalDAMappingsPerPage" (pageChanged)="daMappingsPageChanged($event)"></pagination>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-lg-8">
-            
-            
-        </div>
-
-        
-    </div>
-    <div class="row">
-        <div class="col-lg-4">
-            <!--<canvas baseChart [data]="pieChartData" [labels]="pieChartLabels" [chartType]="pieChartType" [options]="pieChartOptions" [plugins]="pieChartPlugins" [legend]="pieChartLegend">
-            </canvas>-->
-            
-        </div>
-    </div>
-
 </div>

@@ -19,17 +19,16 @@
  * @format
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { IFetchResponse } from '@c8y/client';
-import { AlertService } from '@c8y/ngx-components';
+import { AlertService, ModalComponent } from '@c8y/ngx-components';
 import { FetchClient } from '@c8y/ngx-components/api';
-import { Chart, ChartOptions, ChartType } from 'chart.js';
+import { Chart } from 'chart.js';
 import * as _ from 'lodash';
 import { DAMapping } from './da-mapping';
 import { MicroserviceHealth } from './microservice-health';
 import { Ticket } from './ticket';
 import { TPConfig } from './tp-config';
-import { SingleDataSet, Label } from 'ng2-charts';
 import { PageChangedEvent } from 'ngx-bootstrap/pagination';
 
 @Component({
@@ -64,6 +63,8 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     private countByPriorityDatapoints: number[]= [];
 
     private chartColors = [];
+
+    @ViewChild('#m1', {static: false}) modal: ModalComponent;
 
 
     public microserviceHealth: MicroserviceHealth = {
