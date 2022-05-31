@@ -27,6 +27,7 @@
         "@c8y/ng1-modules": "1011.0.12",
         "@c8y/ngx-components": "1011.0.12",
         "@c8y/style": "1011.0.12",
+        "@nestjs/cli": "7.6.0",
         "angular": "1.6.9",
         "chart.js": "2.9.4",
         "core-js": "3.4.0",

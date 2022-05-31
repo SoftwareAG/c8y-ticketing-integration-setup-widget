@@ -39,6 +39,7 @@
                         <th>Priority</th>
                         <th>Alarm id</th>
                         <th>Device id</th>
+                        <th>Comments</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,6 +53,7 @@
                         <td>{{ticket.priority}}</td>
                         <td>{{ticket.alarmId}}</td>
                         <td>{{ticket.deviceId}}</td>
+                        <td><button class="btn btn-default" (click)="showTicketComments(ticket)">View</button></td>
                     </tr>
                 </tbody>
             </table>

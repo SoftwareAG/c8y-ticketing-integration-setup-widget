@@ -24,13 +24,15 @@ import { CumulocityTicketingIntegrationSetupWidgetConfig } from "./c8y-ticketing
 import { CumulocityTicketingIntegrationSetupWidget } from "./c8y-ticketing-integration-setup-widget.component";
 import { NgModule } from "@angular/core";
 import { HttpClientModule } from "@angular/common/http";
-import { ChartsModule, ThemeService } from "ng2-charts";
+import { ChartsModule } from "ng2-charts";
 import { PaginationModule } from "ngx-bootstrap/pagination";
+import { TicketCommentModal } from "./modal/ticket-comment-modal.component";
+import { ModalModule } from "ngx-bootstrap/modal";
 
 @NgModule({
-    imports: [CoreModule, HttpClientModule, ChartsModule, PaginationModule],
-    declarations: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig],
-    entryComponents: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig],
+    imports: [CoreModule, HttpClientModule, ChartsModule, PaginationModule, ModalModule],
+    declarations: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig, TicketCommentModal],
+    entryComponents: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig, TicketCommentModal],
     providers: [
         {
             provide: HOOK_COMPONENTS,
@@ -48,8 +50,7 @@ import { PaginationModule } from "ngx-bootstrap/pagination";
                     },
                 },
             },
-        },
-        ThemeService
+        }
     ],
 })
 export class CumulocityTicketingIntegrationSetupWidgetModule { }

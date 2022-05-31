@@ -30,6 +30,8 @@ import { MicroserviceHealth } from './microservice-health';
 import { Ticket } from './ticket';
 import { TPConfig } from './tp-config';
 import { PageChangedEvent } from 'ngx-bootstrap/pagination';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { TicketCommentModal } from './modal/ticket-comment-modal.component';
 
 @Component({
     selector: "lib-c8y-ticketing-integration-setup-widget",
@@ -71,7 +73,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         status: "Checking..."
     };
 
-    constructor(private fetchClient: FetchClient, private alertService: AlertService) {
+    constructor(private fetchClient: FetchClient, private alertService: AlertService, private modalService: BsModalService) {
     }
 
     ngOnInit(): void {
@@ -197,6 +199,27 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         return foundIndex;
     }
 
+    public showTicketComments(ticket: Ticket) {
+        let url = "/service/ticketing/tickets/"+ticket.id+"/comments";
+        let fetchResp: Promise<IFetchResponse> = this.fetchClient.fetch(url);
+        fetchResp.then((resp: IFetchResponse) => {
+            if(resp.status === 200) {
+                resp.json().then((jsonResp) => {
+                    let message = {
+                        comments: jsonResp
+                    };
+                    this.modalService.show(TicketCommentModal, { class: 'c8y-wizard', initialState: {message} });
+                }).catch((err) => {
+                    console.log("Ticketing Integration Setup Widget - Unable to fetch ticket comments JSON response: " + err);
+                });
+            } else {
+                console.log("Ticketing Integration Setup Widget - Unable to fetch ticket comments: " + resp.status);
+            }
+        }).catch((err) => {
+            console.log("Ticketing Integration Setup Widget - Unable to fetch ticket comments: " + err);
+        });
+    }
+
     public getMicroserviceHealth(): void {
         let healthFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/health")
         healthFetchClient.then((resp: IFetchResponse) => {
@@ -262,5 +285,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         const endItem = event.page * this.totalDAMappingsPerPage;
         this.paginatedDAMappings = this.daMappings.slice(startItem, endItem);
     }
+
+
 
 }
