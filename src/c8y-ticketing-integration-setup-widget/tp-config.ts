@@ -5,4 +5,5 @@ export interface TPConfig {
     tenantUrl: string;
     accountId: string;
     alarmSubscription: boolean;
+    autoAcknowledgeAlarm: boolean;
 }

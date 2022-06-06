@@ -33,13 +33,23 @@
     </div>
     <div class="col-lg-6">
         <div class="form-group">
-            <label title="Checkbox One" class="c8y-checkbox" style="margin-top: 24px;">
+            <label title="Create tickets automatically on alarm creation" class="c8y-checkbox" style="margin-top: 24px;">
                 <input type="checkbox" [(ngModel)]="tpConfig.alarmSubscription" />
                 <span></span>
                 <span>Create tickets automatically</span>
             </label>
         </div>
     </div>
+    <div class="col-lg-12">
+        <div class="form-group">
+            <label class="c8y-checkbox">
+                <input type="checkbox" [(ngModel)]="tpConfig.autoAcknowledgeAlarm" />
+                <span></span>
+                <span>Change alarm status to ACKNOWLEDGE automcatically after creating ticket</span>
+            </label>
+        </div>
+    </div>
+    
 </div>
 <div class="row">
     <div class="col-lg-12">

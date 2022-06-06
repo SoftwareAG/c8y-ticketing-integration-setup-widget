@@ -48,7 +48,8 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         username: '',
         password: '',
         accountId: '',
-        alarmSubscription: false
+        alarmSubscription: false,
+        autoAcknowledgeAlarm: false
     };
     public daMappings: DAMapping[] = [];
     public paginatedDAMappings: DAMapping[] = [];

@@ -44,7 +44,8 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         username: '',
         password: '',
         accountId: '',
-        alarmSubscription: false
+        alarmSubscription: false,
+        autoAcknowledgeAlarm: false
     };
 
     public tpConfigSaved: boolean = false;
