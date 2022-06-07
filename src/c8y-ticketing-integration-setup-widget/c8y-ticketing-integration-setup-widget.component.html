@@ -1,32 +1,84 @@
 <div style="margin-left: 15px; margin-right: 15px;">
     <div style="margin-bottom: 10px;">
-        <h4>Microservice health</h4>
+        <h4>Microservice</h4>
     </div>
     <div class="d-flex" style="margin-bottom: 20px;">
         <div style="margin-right: 40px;">
             <p>
-                <b>Status </b><span *ngIf="microserviceHealth">{{microserviceHealth.status}}</span>
+                <b>Status </b>
+                <span *ngIf="microserviceHealth && microserviceHealth.status === 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.status}}" style="color: green;"></i>
+                </span>
+                <span *ngIf="microserviceHealth && microserviceHealth.status !== 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.status}}" style="color: red;"></i>
+                </span>
             </p>
         </div>
         <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
             <p>
-                <b>Disk space </b><span>{{microserviceHealth.components.diskSpace.status}}</span>
+                <b>Disk space </b>
+                <span *ngIf="microserviceHealth.components.diskSpace.status === 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.diskSpace.status}}" style="color: green;"></i>
+                </span>
+                <span *ngIf="microserviceHealth.components.diskSpace.status !== 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.diskSpace.status}}" style="color: red;"></i>
+                </span>
             </p>
         </div>
         <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
             <p>
-                <b>Heap memory </b><span>{{microserviceHealth.components.heapMemory.status}}</span>
+                <b>Heap memory </b>
+                <span *ngIf="microserviceHealth.components.heapMemory.status === 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.heapMemory.status}}" style="color: green;"></i>
+                </span>
+                <span *ngIf="microserviceHealth.components.heapMemory.status !== 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.heapMemory.status}}" style="color: red;"></i>
+                </span>
             </p>
         </div>
         <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
             <p>
-                <b>Non-heap memory </b><span>{{microserviceHealth.components.nonHeapMemory.status}}</span>
+                <b>Non-heap memory </b>
+                <span *ngIf="microserviceHealth.components.nonHeapMemory.status === 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.nonHeapMemory.status}}" style="color: green;"></i>
+                </span>
+                <span *ngIf="microserviceHealth.components.nonHeapMemory.status !== 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.nonHeapMemory.status}}" style="color: red;"></i>
+                </span>
             </p>
+        </div>
+        <div style="margin-right: 40px;">
+            <a class="btn btn-xs btn-primary" href="/apps/administration/index.html#/applications/{{microserviceAppId}}/logs" target="_blank" title="View microservice logs">View logs</a>
         </div>
     </div>
     <div class="d-flex flex-wrap">
         <div style="margin-right: 30px; margin-bottom: 20px;">
-            <h4>All tickets</h4>
+            <h4 style="margin-bottom: 20px;">All tickets</h4>
+            <div class="d-flex">
+                <!-- Search -->
+                <div style="margin-right: 40px;">
+                    <div id="search" class="input-group input-group-search" style="margin-bottom: 10px;">
+                        <input type="search" class="form-control" placeholder="Search…" [(ngModel)]="ticketFilter.searchText" (ngModelChange)="searchTextChanged()" />
+                        <span class="input-group-addon">
+                            <i c8yIcon="search" *ngIf="!ticketFilter.searchText || ticketFilter.searchText.length === 0"></i>
+                            <i c8yIcon="times" class="text-muted" *ngIf="ticketFilter.searchText && ticketFilter.searchText.length > 0" (click)="ticketFilter.searchText = ''; searchTextChanged()"></i>
+                        </span>
+                    </div>
+                </div>
+                <!-- Status filter -->
+                <div style="margin-right: 40px;">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button *ngFor="let status of ticketFilter.status; let i=index;" type="button" class="btn btn-default" [ngClass]="status.selected ? 'active' : ''" (click)="toggleStatusFilter(i)">{{status.label}}</button>
+                      </div>
+                </div>
+                <!-- Priority filter -->
+                <div style="margin-right: 40px;">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button *ngFor="let priority of ticketFilter.priority; let i=index;" type="button" class="btn btn-default" [ngClass]="priority.selected ? 'active' : ''" (click)="togglePriorityFilter(i)">{{priority.label}}</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Tickets table -->
             <table class="table table-striped c8y-table-responsive" style="margin-bottom: 10px;">
                 <thead>
                     <tr>
@@ -47,8 +99,8 @@
                         <td>{{ticket.id}}</td>
                         <td>{{ticket.subject}}</td>
                         <td>{{ticket.description}}</td>
-                        <td>{{ticket.creationDate}}</td>
-                        <td>{{ticket.lastUpdateDate}}</td>
+                        <td>{{ticket.creationDate | date: 'dd MMM yyyy, HH:mm:ss'}}</td>
+                        <td>{{ticket.lastUpdateDate | date: 'dd MMM yyyy, HH:mm:ss'}}</td>
                         <td>{{ticket.status}}</td>
                         <td>{{ticket.priority}}</td>
                         <td>{{ticket.alarmId}}</td>
@@ -57,7 +109,7 @@
                     </tr>
                 </tbody>
             </table>
-            <pagination [totalItems]="tickets.length" previousText=" "   
+            <pagination [totalItems]="searchedTickets.length" previousText=" "   
             nextText=" " [itemsPerPage]="totalTicketsPerPage" (pageChanged)="ticketsPageChanged($event)"></pagination>
         </div>
         <div style="margin-right: 30px;">

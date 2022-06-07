@@ -20,10 +20,9 @@
  */
 
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { IFetchResponse } from '@c8y/client';
+import { IApplication, IFetchResponse, IResultList } from '@c8y/client';
 import { AlertService, ModalComponent } from '@c8y/ngx-components';
-import { FetchClient } from '@c8y/ngx-components/api';
-import { Chart } from 'chart.js';
+import { FetchClient, ApplicationService } from '@c8y/ngx-components/api';
 import * as _ from 'lodash';
 import { DAMapping } from './da-mapping';
 import { MicroserviceHealth } from './microservice-health';
@@ -32,6 +31,9 @@ import { TPConfig } from './tp-config';
 import { PageChangedEvent } from 'ngx-bootstrap/pagination';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { TicketCommentModal } from './modal/ticket-comment-modal.component';
+import * as Chart from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { ThrowStmt } from '@angular/compiler';
 
 @Component({
     selector: "lib-c8y-ticketing-integration-setup-widget",
@@ -42,6 +44,14 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
 
     @Input() config;
 
+    public microserviceAppId: string = "";
+
+    public ticketFilter = {
+        searchText: "",
+        status: [],
+        priority: []
+    };
+
     public tpConfig: TPConfig = {
         name: '',
         tenantUrl: '',
@@ -51,21 +61,25 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         alarmSubscription: false,
         autoAcknowledgeAlarm: false
     };
+
     public daMappings: DAMapping[] = [];
     public paginatedDAMappings: DAMapping[] = [];
     public totalDAMappingsPerPage: number = 1;
 
     public tickets: Ticket[] = [];
+    public searchedTickets: Ticket[] = [];
     public paginatedTickets: Ticket[] = [];
     public totalTicketsPerPage: number = 1;
 
     private countByStatusLabels: string[] = [];
-    private countByStatusDatapoints: number[] = []
+    private countByStatusDatapoints: number[] = [];
 
     private countByPriorityLabels: string[] = [];
     private countByPriorityDatapoints: number[]= [];
 
     private chartColors = [];
+
+    private statusChart: Chart;
 
     @ViewChild('#m1', {static: false}) modal: ModalComponent;
 
@@ -74,7 +88,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         status: "Checking..."
     };
 
-    constructor(private fetchClient: FetchClient, private alertService: AlertService, private modalService: BsModalService) {
+    constructor(private fetchClient: FetchClient, private alertService: AlertService, private modalService: BsModalService, private appService: ApplicationService) {
     }
 
     ngOnInit(): void {
@@ -88,6 +102,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                 this.totalDAMappingsPerPage = this.config.customwidgetdata.daMappingsPageSize;
                 this.chartColors = this.config.customwidgetdata.chartColors;
             }
+            this.getApplication();
             this.getMicroserviceHealth();
             this.initialiseTPConfig();
         } catch(err) {
@@ -138,6 +153,19 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         });
         
     }
+
+    private getApplication(): void {
+        let appResp: Promise<IResultList<IApplication>> = this.appService.listByName("ticketing");
+        appResp.then((resp: IResultList<IApplication>) => {
+            if(resp.res.status === 200) {
+                this.microserviceAppId = resp.data[0].id.toString();
+            } else {
+                console.log("Ticketing Integration Setup Widget - Error fetching Ticketing application: "+resp.res);
+            }
+        }).catch((err) => {
+            console.log("Ticketing Integration Setup Widget - Error fetching Ticketing application: "+err);
+        });
+    }
    
     
     private getAllTickets(): void {
@@ -147,11 +175,16 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                 resp.json().then((tickets: Ticket[]) => {
                     
                     this.tickets = tickets;
-                    this.paginatedTickets = tickets.slice(0, this.totalTicketsPerPage);
+                    this.searchedTickets = tickets;
+                    this.paginatedTickets = this.searchedTickets.slice(0, this.totalTicketsPerPage);
 
                     tickets.forEach((ticket) => {
                         let statusFoundIndex = this.findEntryInStatus(ticket.status);
                         if(statusFoundIndex === -1) {
+                            this.ticketFilter.status.push({
+                                label: ticket.status,
+                                selected: true
+                            });
                             this.countByStatusLabels.push(ticket.status);
                             this.countByStatusDatapoints.push(1);
                         } else {
@@ -160,6 +193,10 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
 
                         let priorityFoundIndex = this.findEntryInPriority(ticket.priority);
                         if(priorityFoundIndex === -1) {
+                            this.ticketFilter.priority.push({
+                                label: ticket.priority,
+                                selected: true
+                            });
                             this.countByPriorityLabels.push(ticket.priority);
                             this.countByPriorityDatapoints.push(1);
                         } else {
@@ -170,11 +207,11 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                     this.showPriorityChart();
                     this.showStatusChart();
                 }).catch((err) => {
-                    console.log("Error processing jsonResp");
+                    console.log("Ticketing Integration Setup Widget - Error fetching all tickets: "+err);
                 });
             }
         }).catch((err) => {
-            console.log("Error fetching tickets");
+            console.log("Ticketing Integration Setup Widget - Error fetching all tickets: "+err);
         });
     }
 
@@ -231,16 +268,17 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             } else if(resp.status === 404) {
                 this.microserviceHealth.status = "Unavailable";
             } else {
-                console.log("Error checking microservice health..."+resp.status);
+                console.log("Error checking microservice health... "+resp.status);
             }
         }).catch((err) => {
-            console.log("Error checking microservice health..."+err);
+            console.log("Error checking microservice health... "+err);
         });
     }
     
     private showPriorityChart() {
         new Chart("priorityChart", {
             type: "pie",
+            plugins: [ChartDataLabels],
             data: {
                 labels: this.countByPriorityLabels,
                 datasets: [{
@@ -250,15 +288,30 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             },
             options: {
                 legend: {
-                    display: false
+                    display: true,
+                    position: 'right'
+                },
+                tooltips: {
+                    enabled: true
+                },
+                plugins: {
+                    datalabels: {
+                        backgroundColor: '#ffffff',
+                        borderRadius: 10,
+                        color: '#111111',
+                        font: {
+                            size: 16
+                        }
+                    }
                 }
             }
         });
     }
 
     private showStatusChart() {
-        new Chart("statusChart", {
+        this.statusChart = new Chart("statusChart", {
             type: "pie",
+            plugins: [ChartDataLabels],
             data: {
                 labels: this.countByStatusLabels,
                 datasets: [{
@@ -268,17 +321,30 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             },
             options: {
                 legend: {
-                    display: false
+                    display: true,
+                    position: 'right'
+                },
+                tooltips: {
+                    enabled: true
+                },
+                plugins: {
+                    datalabels: {
+                        backgroundColor: '#ffffff',
+                        borderRadius: 10,
+                        color: '#111111',
+                        font: {
+                            size: 16
+                        }
+                    }
                 }
-            }
+            },
         });
     }
-
 
     public ticketsPageChanged(event: PageChangedEvent): void {
         const startItem = (event.page - 1) * this.totalTicketsPerPage;
         const endItem = event.page * this.totalTicketsPerPage;
-        this.paginatedTickets = this.tickets.slice(startItem, endItem);
+        this.paginatedTickets = this.searchedTickets.slice(startItem, endItem);
     }
 
     public daMappingsPageChanged(event: PageChangedEvent): void {
@@ -287,6 +353,65 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         this.paginatedDAMappings = this.daMappings.slice(startItem, endItem);
     }
 
+    public toggleStatusFilter(index) {
+        if(this.ticketFilter.status[index].selected) {
+            this.ticketFilter.status[index].selected = false;
+        } else {
+            this.ticketFilter.status[index].selected = true;
+        }
+        this.filterTickets();
+    }
 
+    public togglePriorityFilter(index) {
+        if(this.ticketFilter.priority[index].selected) {
+            this.ticketFilter.priority[index].selected = false;
+        } else {
+            this.ticketFilter.priority[index].selected = true;
+        }
+        this.filterTickets();
+    }
+
+    public searchTextChanged() {
+        this.filterTickets();
+    }
+
+    private filterTickets() {
+        let statusMatched = false;
+        let priorityMatched = false;
+        let searchTextMatched = false;
+
+        this.searchedTickets = [];
+
+        this.tickets.forEach(t => {
+            for(let i=0; i<this.ticketFilter.status.length; i++) {
+                if(this.ticketFilter.status[i].selected && this.ticketFilter.status[i].label === t.status) {
+                    statusMatched = true;
+                }
+            }
+
+            for(let i=0; i<this.ticketFilter.priority.length; i++) {
+                if(this.ticketFilter.priority[i].selected && this.ticketFilter.priority[i].label === t.priority) {
+                    priorityMatched = true;
+                }
+            }
+
+            if(this.ticketFilter.searchText === undefined || this.ticketFilter.searchText === null || this.ticketFilter.searchText === "" ) {
+                searchTextMatched = true
+            } else {
+                if(t.subject.includes(this.ticketFilter.searchText) || t.description.includes(this.ticketFilter.searchText)) {
+                    searchTextMatched = true;
+                }
+            }
+
+            if(statusMatched && priorityMatched && searchTextMatched) {
+                this.searchedTickets.push(t);
+            }
+
+            statusMatched = priorityMatched = searchTextMatched = false;
+        });
+
+        this.paginatedTickets = this.searchedTickets.slice(0, this.totalTicketsPerPage);
+
+    }
 
 }
