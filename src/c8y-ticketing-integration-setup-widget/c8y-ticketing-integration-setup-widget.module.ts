@@ -28,9 +28,10 @@ import { ChartsModule } from "ng2-charts";
 import { PaginationModule } from "ngx-bootstrap/pagination";
 import { TicketCommentModal } from "./modal/ticket-comment-modal.component";
 import { ModalModule } from "ngx-bootstrap/modal";
+import { BsDatepickerModule } from "ngx-bootstrap/datepicker";
 
 @NgModule({
-    imports: [CoreModule, HttpClientModule, ChartsModule, PaginationModule, ModalModule],
+    imports: [CoreModule, HttpClientModule, ChartsModule, PaginationModule, ModalModule, BsDatepickerModule],
     declarations: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig, TicketCommentModal],
     entryComponents: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig, TicketCommentModal],
     providers: [

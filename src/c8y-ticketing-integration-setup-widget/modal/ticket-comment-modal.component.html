@@ -19,7 +19,7 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let c of message.comments">
-                            <td>{{c.creationDate}}</td>
+                            <td>{{c.creationDate | date: 'dd MMM yyyy, HH:mm:ss'}}</td>
                             <td [innerHTML]="c.description"></td>
                         </tr>
                     </tbody>

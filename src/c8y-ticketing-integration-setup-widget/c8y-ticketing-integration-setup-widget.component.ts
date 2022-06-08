@@ -33,7 +33,6 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { TicketCommentModal } from './modal/ticket-comment-modal.component';
 import * as Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { ThrowStmt } from '@angular/compiler';
 
 @Component({
     selector: "lib-c8y-ticketing-integration-setup-widget",
@@ -49,7 +48,8 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     public ticketFilter = {
         searchText: "",
         status: [],
-        priority: []
+        priority: [],
+        creationDate: null
     };
 
     public tpConfig: TPConfig = {
@@ -78,8 +78,6 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     private countByPriorityDatapoints: number[]= [];
 
     private chartColors = [];
-
-    private statusChart: Chart;
 
     @ViewChild('#m1', {static: false}) modal: ModalComponent;
 
@@ -309,7 +307,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     }
 
     private showStatusChart() {
-        this.statusChart = new Chart("statusChart", {
+        new Chart("statusChart", {
             type: "pie",
             plugins: [ChartDataLabels],
             data: {
@@ -375,10 +373,15 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         this.filterTickets();
     }
 
+    public creationDateFilterChanged() {
+        this.filterTickets();
+    }
+
     private filterTickets() {
         let statusMatched = false;
         let priorityMatched = false;
         let searchTextMatched = false;
+        let creationDateMatched = false;
 
         this.searchedTickets = [];
 
@@ -396,18 +399,26 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             }
 
             if(this.ticketFilter.searchText === undefined || this.ticketFilter.searchText === null || this.ticketFilter.searchText === "" ) {
-                searchTextMatched = true
+                searchTextMatched = true;
             } else {
                 if(t.subject.includes(this.ticketFilter.searchText) || t.description.includes(this.ticketFilter.searchText)) {
                     searchTextMatched = true;
                 }
             }
 
-            if(statusMatched && priorityMatched && searchTextMatched) {
+            if(this.ticketFilter.creationDate === undefined || this.ticketFilter.creationDate === null) {
+                creationDateMatched = true;
+            } else {
+                if(new Date(t.creationDate) >= this.ticketFilter.creationDate) {
+                    creationDateMatched = true;
+                }
+            }
+
+            if(statusMatched && priorityMatched && searchTextMatched && creationDateMatched) {
                 this.searchedTickets.push(t);
             }
 
-            statusMatched = priorityMatched = searchTextMatched = false;
+            statusMatched = priorityMatched = searchTextMatched = creationDateMatched = false;
         });
 
         this.paginatedTickets = this.searchedTickets.slice(0, this.totalTicketsPerPage);
