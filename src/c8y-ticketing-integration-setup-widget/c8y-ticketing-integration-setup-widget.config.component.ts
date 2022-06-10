@@ -35,7 +35,8 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
     public widgetConfig = {
         ticketsPageSize: 5,
         daMappingsPageSize: 5,
-        chartColors: ["#1776bf"]
+        chartColors: ["#1776bf"],
+        maxTickets: 100
     };
 
     public tpConfig: TPConfig = {

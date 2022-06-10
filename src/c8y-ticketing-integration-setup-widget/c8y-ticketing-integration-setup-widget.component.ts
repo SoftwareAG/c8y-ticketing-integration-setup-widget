@@ -33,6 +33,7 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { TicketCommentModal } from './modal/ticket-comment-modal.component';
 import * as Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Router } from '@angular/router';
 
 @Component({
     selector: "lib-c8y-ticketing-integration-setup-widget",
@@ -77,7 +78,13 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     private countByPriorityLabels: string[] = [];
     private countByPriorityDatapoints: number[]= [];
 
+    private countByDeviceIdLabels: string[] = [];
+    private countByDeviceIdDatapoints: number[]= [];
+
+    public averageCycleTime = 0;
+
     private chartColors = [];
+    private maxTickets: number = 100;
 
     @ViewChild('#m1', {static: false}) modal: ModalComponent;
 
@@ -86,7 +93,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         status: "Checking..."
     };
 
-    constructor(private fetchClient: FetchClient, private alertService: AlertService, private modalService: BsModalService, private appService: ApplicationService) {
+    constructor(private fetchClient: FetchClient, private alertService: AlertService, private modalService: BsModalService, private appService: ApplicationService, private router: Router) {
     }
 
     ngOnInit(): void {
@@ -99,6 +106,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                 this.totalTicketsPerPage = this.config.customwidgetdata.ticketsPageSize;
                 this.totalDAMappingsPerPage = this.config.customwidgetdata.daMappingsPageSize;
                 this.chartColors = this.config.customwidgetdata.chartColors;
+                this.maxTickets = this.config.customwidgetdata.maxTickets;
             }
             this.getApplication();
             this.getMicroserviceHealth();
@@ -167,7 +175,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
    
     
     private getAllTickets(): void {
-        let ticketsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/tickets");
+        let ticketsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/tickets?pageSize="+this.maxTickets);
         ticketsFetchClient.then((resp) => {
             if(resp.status === 200) {
                 resp.json().then((tickets: Ticket[]) => {
@@ -175,6 +183,10 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                     this.tickets = tickets;
                     this.searchedTickets = tickets;
                     this.paginatedTickets = this.searchedTickets.slice(0, this.totalTicketsPerPage);
+
+
+                    let differenceSum = 0;
+                    let closedTicketsCount = 0;
 
                     tickets.forEach((ticket) => {
                         let statusFoundIndex = this.findEntryInStatus(ticket.status);
@@ -200,10 +212,31 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                         } else {
                             this.countByPriorityDatapoints[priorityFoundIndex] = this.countByPriorityDatapoints[priorityFoundIndex] + 1;
                         }
+
+                        let deviceIdFoundIndex = this.findEntryInDevice(ticket.deviceId);
+                        if(deviceIdFoundIndex === -1) {
+                            this.countByDeviceIdLabels.push(ticket.deviceId);
+                            this.countByDeviceIdDatapoints.push(1);
+                        } else {
+                            this.countByDeviceIdDatapoints[deviceIdFoundIndex] = this.countByDeviceIdDatapoints[deviceIdFoundIndex] + 1;
+                        }
+                        
+                        // Calculate average cycle time
+                        if(ticket.status === "Closed") {
+                            let creationDate: Date = new Date(ticket.creationDate);
+                            let closedDate: Date = new Date(ticket.lastUpdateDate);
+                            let difference = (closedDate.getTime() - creationDate.getTime()) / 3600000; // converting milliseconds into hours
+                            differenceSum = differenceSum + difference;
+                            closedTicketsCount = closedTicketsCount + 1;
+                        }
+
                     });
+
+                    this.averageCycleTime = differenceSum / closedTicketsCount;
                    
                     this.showPriorityChart();
                     this.showStatusChart();
+                    this.showDeviceChart();
                 }).catch((err) => {
                     console.log("Ticketing Integration Setup Widget - Error fetching all tickets: "+err);
                 });
@@ -228,6 +261,17 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         let foundIndex: number = -1;
         for(let i=0; i<this.countByPriorityLabels.length; i++) {
             if(priority === this.countByPriorityLabels[i]) {
+                foundIndex = i;
+                break;
+            }
+        }
+        return foundIndex;
+    }
+
+    private findEntryInDevice(deviceId: string): number {
+        let foundIndex: number = -1;
+        for(let i=0; i<this.countByDeviceIdLabels.length; i++) {
+            if(deviceId === this.countByDeviceIdLabels[i]) {
                 foundIndex = i;
                 break;
             }
@@ -339,6 +383,39 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         });
     }
 
+    private showDeviceChart() {
+        new Chart("deviceChart", {
+            type: "pie",
+            plugins: [ChartDataLabels],
+            data: {
+                labels: this.countByDeviceIdLabels,
+                datasets: [{
+                    data: this.countByDeviceIdDatapoints,
+                    backgroundColor: this.chartColors
+                }]
+            },
+            options: {
+                legend: {
+                    display: true,
+                    position: 'right'
+                },
+                tooltips: {
+                    enabled: true
+                },
+                plugins: {
+                    datalabels: {
+                        backgroundColor: '#ffffff',
+                        borderRadius: 10,
+                        color: '#111111',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            },
+        });
+    }
+
     public ticketsPageChanged(event: PageChangedEvent): void {
         const startItem = (event.page - 1) * this.totalTicketsPerPage;
         const endItem = event.page * this.totalTicketsPerPage;
@@ -422,7 +499,14 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         });
 
         this.paginatedTickets = this.searchedTickets.slice(0, this.totalTicketsPerPage);
+    }
 
+    public redirectToMicroserviceLogs() {
+        window.open("/apps/administration/index.html#/applications/"+this.microserviceAppId+"/logs", "_blank");
+    }
+
+    public redirectToDevicePage(deviceId: string) {
+        window.open("/apps/devicemanagement/index.html#/device/"+deviceId+"/device-info");
     }
 
 }
