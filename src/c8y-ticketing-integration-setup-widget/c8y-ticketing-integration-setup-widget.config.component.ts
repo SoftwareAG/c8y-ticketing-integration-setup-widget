@@ -105,13 +105,13 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
                 resp.json().then((jsonResp) => {
                     this.daMappings = jsonResp;
                 }).catch((err) => {
-                    console.log("Ticketing Integration Setup Widget - Error accessing daMappings response body as JSON: "+err);
+                    this.alertService.danger("Ticketing Integration Setup Widget Config - Error accessing daMappings response body as JSON", err)
                 });
             } else {
-                console.log("Ticketing Integration Setup Widget - Unable to fetch daMappings: "+resp.status);
+                this.alertService.danger("Ticketing Integration Setup Widget Config - Unable to fetch daMappings", resp.status.toString());
             }
         }).catch((err) => {
-            console.log("Ticketing Integration Setup Widget - Error accessing dpMappings fetchClient: "+err);
+            this.alertService.danger("Ticketing Integration Setup Widget Config - Error accessing dpMappings fetchClient", err);
         });
     }
 
@@ -155,10 +155,10 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
                 this.tpConfigSaved = true;
                 this.alertService.success("Configuration saved successfully.");
             } else {
-                this.alertService.danger("Error saving configuration.", resp.status.toString());
+                this.alertService.danger("Ticketing Integration Setup Widget Config - Error saving configuration.", resp.status.toString());
             }
         }).catch((err) => {
-            this.alertService.danger("Error saving configuration.", err);
+            this.alertService.danger("Ticketing Integration Setup Widget Config - Error saving configuration.", err);
         });
     }
 
@@ -174,10 +174,10 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
             if(resp.status === 200) {
                 this.alertService.success("Configuration updated successfully.");
             } else {
-                this.alertService.danger("Error updating configuration.", resp.status.toString());
+                this.alertService.danger("Ticketing Integration Setup Widget Config - Error updating configuration.", resp.status.toString());
             }
         }).catch((err) => {
-            this.alertService.danger("Error updating configuration.", err);
+            this.alertService.danger("Ticketing Integration Setup Widget Config - Error updating configuration.", err);
         });
     }
 
@@ -192,10 +192,10 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
             if(resp.status === 200) {
                 this.alertService.success("Mappings saved successfully.");
             } else {
-                this.alertService.danger("Error saving mappings.", resp.status.toString());
+                this.alertService.danger("Ticketing Integration Setup Widget Config - Error saving mappings.", resp.status.toString());
             }
         }).catch((err) => {
-            this.alertService.danger("Error saving mappings.", err.toString());
+            this.alertService.danger("Ticketing Integration Setup Widget Config - Error saving mappings.", err.toString());
         });
     }
 

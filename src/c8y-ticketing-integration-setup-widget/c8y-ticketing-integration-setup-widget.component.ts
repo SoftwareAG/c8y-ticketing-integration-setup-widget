@@ -19,9 +19,9 @@
  * @format
  */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { IApplication, IFetchResponse, IResultList } from '@c8y/client';
-import { AlertService, ModalComponent } from '@c8y/ngx-components';
+import { AlertService } from '@c8y/ngx-components';
 import { FetchClient, ApplicationService } from '@c8y/ngx-components/api';
 import * as _ from 'lodash';
 import { DAMapping } from './da-mapping';
@@ -33,7 +33,6 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { TicketCommentModal } from './modal/ticket-comment-modal.component';
 import * as Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { Router } from '@angular/router';
 
 @Component({
     selector: "lib-c8y-ticketing-integration-setup-widget",
@@ -86,14 +85,12 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     private chartColors = [];
     private maxTickets: number = 100;
 
-    @ViewChild('#m1', {static: false}) modal: ModalComponent;
-
 
     public microserviceHealth: MicroserviceHealth = {
         status: "Checking..."
     };
 
-    constructor(private fetchClient: FetchClient, private alertService: AlertService, private modalService: BsModalService, private appService: ApplicationService, private router: Router) {
+    constructor(private fetchClient: FetchClient, private alertService: AlertService, private modalService: BsModalService, private appService: ApplicationService) {
     }
 
     ngOnInit(): void {
@@ -112,33 +109,33 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             this.getMicroserviceHealth();
             this.initialiseTPConfig();
         } catch(err) {
-            console.log("Ticketing Integration Setup Widget - initialise() "+err);
+            this.alertService.danger("Ticketing Integration Setup Widget - initialise()", err);
         }
     }
 
     private initialiseTPConfig(): void {
         let tpConfigFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/tpconfig");
-            tpConfigFetchClient.then((resp: IFetchResponse) => {
-                if(resp.status === 200) {
-                    resp.json().then((jsonResp) => {
-                        this.tpConfig = jsonResp;
-                        if(this.tpConfig.alarmSubscription) {
-                            this.initialiseDAMappings();
-                        }
-                        this.getAllTickets();
-                    }).catch((err)=> {
-                        console.log("Ticketing Integration Setup Widget - Error accessing tpConfig response body as JSON: "+err);
-                    });
-                } else if(resp.status === 400) {
-                    console.log("Ticketing Integration Setup Widget - tpConfig doesn't exist.");
-                } else if(resp.status === 404) {
-                    console.log("Ticketing Integration Setup Widget - Microservice or API is unavailable.");
-                } else {
-                    console.log("Ticketing Integration Setup Widget - Unable to fetch tpConfig: "+resp.status);
-                }
-            }).catch((err) => {
-                console.log("Ticketing Integration Setup Widget - Error accessing tpConfig fetchClient: "+ err);
-            });
+        tpConfigFetchClient.then((resp: IFetchResponse) => {
+            if(resp.status === 200) {
+                resp.json().then((jsonResp) => {
+                    this.tpConfig = jsonResp;
+                    if(this.tpConfig.alarmSubscription) {
+                        this.initialiseDAMappings();
+                    }
+                    this.getAllTickets();
+                }).catch((err)=> {
+                    this.alertService.danger("Ticketing Integration Setup Widget - Error accessing tpConfig response body as JSON", err);
+                });
+            } else if(resp.status === 400) {
+                this.alertService.danger("Ticketing Integration Setup Widget - tpConfig doesn't exist.");
+            } else if(resp.status === 404) {
+                this.alertService.danger("Ticketing Integration Setup Widget - Microservice or API is unavailable.");
+            } else {
+                this.alertService.danger("Ticketing Integration Setup Widget - Unable to fetch tpConfig", resp.status.toString());
+            }
+        }).catch((err) => {
+            this.alertService.danger("Ticketing Integration Setup Widget - Error accessing tpConfig fetchClient: "+ err);
+        });
     }
 
     private initialiseDAMappings(): void {
@@ -149,13 +146,13 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                     this.daMappings = jsonResp;
                     this.paginatedDAMappings = jsonResp.slice(0, this.totalDAMappingsPerPage);
                 }).catch((err) => {
-                    console.log("Ticketing Integration Setup Widget - Error accessing daMappings response body as JSON: "+err);
+                    this.alertService.danger("Ticketing Integration Setup Widget - Error accessing daMappings response body as JSON", err);
                 });
             } else {
-                console.log("Ticketing Integration Setup Widget - Unable to fetch daMappings: "+resp.status);
+                this.alertService.danger("Ticketing Integration Setup Widget - Unable to fetch daMappings.", resp.status.toString());
             }
         }).catch((err) => {
-            console.log("Ticketing Integration Setup Widget - Error accessing dpMappings fetchClient: "+err);
+            this.alertService.danger("Ticketing Integration Setup Widget - Error accessing dpMappings fetchClient", err);
         });
         
     }
@@ -166,10 +163,10 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             if(resp.res.status === 200) {
                 this.microserviceAppId = resp.data[0].id.toString();
             } else {
-                console.log("Ticketing Integration Setup Widget - Error fetching Ticketing application: "+resp.res);
+                this.alertService.danger("Ticketing Integration Setup Widget - Error fetching Ticketing application", resp.res.status.toString());
             }
         }).catch((err) => {
-            console.log("Ticketing Integration Setup Widget - Error fetching Ticketing application: "+err);
+            this.alertService.danger("Ticketing Integration Setup Widget - Error fetching Ticketing application: "+err);
         });
     }
    
@@ -238,11 +235,11 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                     this.showStatusChart();
                     this.showDeviceChart();
                 }).catch((err) => {
-                    console.log("Ticketing Integration Setup Widget - Error fetching all tickets: "+err);
+                    this.alertService.danger("Ticketing Integration Setup Widget - Error fetching all tickets", err);
                 });
             }
         }).catch((err) => {
-            console.log("Ticketing Integration Setup Widget - Error fetching all tickets: "+err);
+            this.alertService.danger("Ticketing Integration Setup Widget - Error fetching all tickets", err);
         });
     }
 
@@ -290,13 +287,13 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                     };
                     this.modalService.show(TicketCommentModal, { class: 'c8y-wizard', initialState: {message} });
                 }).catch((err) => {
-                    console.log("Ticketing Integration Setup Widget - Unable to fetch ticket comments JSON response: " + err);
+                    this.alertService.danger("Ticketing Integration Setup Widget - Unable to fetch ticket comments JSON response", err);
                 });
             } else {
-                console.log("Ticketing Integration Setup Widget - Unable to fetch ticket comments: " + resp.status);
+                this.alertService.danger("Ticketing Integration Setup Widget - Unable to fetch ticket comments", resp.status.toString());
             }
         }).catch((err) => {
-            console.log("Ticketing Integration Setup Widget - Unable to fetch ticket comments: " + err);
+            this.alertService.danger("Ticketing Integration Setup Widget - Unable to fetch ticket comments", err);
         });
     }
 
@@ -310,10 +307,10 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             } else if(resp.status === 404) {
                 this.microserviceHealth.status = "Unavailable";
             } else {
-                console.log("Error checking microservice health... "+resp.status);
+                this.alertService.danger("Ticketing Integration Setup Widget - Error fetching microservice health", resp.status.toString());
             }
         }).catch((err) => {
-            console.log("Error checking microservice health... "+err);
+            this.alertService.danger("Ticketing Integration Setup Widget - Error fetching microservice health", err);
         });
     }
     
@@ -506,7 +503,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     }
 
     public redirectToDevicePage(deviceId: string) {
-        window.open("/apps/devicemanagement/index.html#/device/"+deviceId+"/device-info");
+        window.open("/apps/devicemanagement/index.html#/device/"+deviceId+"/device-info", "_blank");
     }
 
 }

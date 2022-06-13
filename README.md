@@ -1,6 +1,6 @@
 # Ticketing Integration Setup Widget for Cumulocity IoT
 
-This widget allows...
+This widget is dependent on Cumulocity IoT Ticketing Integration microservice. It allows to configure the microservice and see the tickets list and charts from ticketing platform.
 
 ![Preview](src/c8y-ticketing-integration-setup-widget/assets/img-preview.png)
 
@@ -16,8 +16,20 @@ This widget allows...
 2. Click on `Add widget`.
 3. Choose `Ticket Integration Setup` widget.
 4. `Title` is the title of widget. Provide a relevant name. You may choose to hide this. Go to `Appearance` tab and choose `Hidden` under `Widget header style`.
-5. Click `Save` to add the widget on the dashboard.
-6. In case you see unexpected results on the widget, refer to browser console to see if there are error logs.
+5. `Platform` is ticketing platform. At the moment only webMethods AgileApps is supported.
+6. `Tenant url` is base url of ticketing platform. It must not end on '/'.
+7. `Username` is username of ticketing platform.
+8. `Password` is password of ticketing platform.
+9. `Account id` is customer account record id to which all the tickets created will be assigned to.
+10. `Create tickets automatically on device alarm mapping matched` controls whether tickets should be created automatically on alarm creation or not.
+11. `Change alarm status to ACKNOWLEDGE automcatically after creating ticket` controls whether to change alarm status to 'Acknowledge' after ticket creation or not.
+12. Click `Save configuration` to save ticketing platform configuration.
+13. Add or remove `Device Alarm Mappings` and click Save Mappings buttons. Mappings means for which device id and alarm type ticket needs to be created.
+14. `Maximum total tickets` is how many total tickets need to be fetched from the ticketing platform.
+15. `Tickets page size` is how many tickets need to be shown in the table at once.
+16. Add and remove `Chart colors` for tickets by priority, tickets by status and tickets by device charts. 
+17. Click `Save` to add the widget on the dashboard.
+18. In case you see unexpected results on the widget, refer to browser console to see if there are error logs.
 
 ### Development - to do the enhancements and testing locally
 1. Clone the repository on local machine using `git clone https://github.com/SoftwareAG/c8y-ticketing-integration-setup-widget.git`.
