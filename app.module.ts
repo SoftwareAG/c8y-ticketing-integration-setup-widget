@@ -43,7 +43,7 @@ import { BsDatepickerModule } from "ngx-bootstrap/datepicker";
       {
         id: 'global.presales.c8y.ticketing.integration.setup.widget',
         label: 'Ticketing Integration Setup',
-        description: 'To configure',
+        description: 'To configure Cumulocity IoT Ticketing Integration microservice and view tickets.',
         component: CumulocityTicketingIntegrationSetupWidget,
         configComponent: CumulocityTicketingIntegrationSetupWidgetConfig,
         previewImage: require("@widget-assets/img-preview.png"),
