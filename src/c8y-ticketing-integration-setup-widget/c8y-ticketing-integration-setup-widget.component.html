@@ -3,22 +3,26 @@
         <div style="margin-right: 40px;">
             <h4 style="margin-bottom: 20px;">Tickets by priority</h4>
             <!-- Tickets by priority chart -->
+            <div *ngIf="tickets.length === 0">No tickets...</div>
             <canvas id="priorityChart"></canvas>
         </div>
         <div style="margin-right: 40px;">
             <h4 style="margin-bottom: 20px;">Tickets by status</h4>
             <!-- Tickets by status chart -->
+            <div *ngIf="tickets.length === 0">No tickets...</div>
             <canvas id="statusChart"></canvas>
         </div>
         <div style="margin-right: 40px;">
             <h4 style="margin-bottom: 20px;">Tickets by device</h4>
             <!-- Tickets by device chart -->
+            <div *ngIf="tickets.length === 0">No tickets...</div>
             <canvas id="deviceChart"></canvas>
         </div>
         <div style="margin-right: 40px;">
             <h4 style="margin-bottom: 20px;">Overall average cycle time</h4>
             <!-- Average cycle time -->
-            <div style="font-size: 50px;">{{averageCycleTime | number : '1.0-1'}} hrs</div>
+            <div style="font-size: 50px;" *ngIf="tickets.length === 0">N.A.</div>
+            <div style="font-size: 50px;" *ngIf="tickets.length !== 0">{{averageCycleTime | number : '1.0-1'}} hrs</div>
         </div>
         <div class="m-auto"></div>
         <div>
@@ -137,7 +141,7 @@
                         <td>{{ticket.status}}</td>
                         <td>{{ticket.priority}}</td>
                         <td>{{ticket.alarmId}}</td>
-                        <td><a href="#" (click)="redirectToDevicePage(ticket.deviceId)">{{ticket.deviceId}}</a></td>
+                        <td><a class="device-link" (click)="redirectToDevicePage(ticket.deviceId)">{{ticket.deviceId}}</a></td>
                         <td><button class="btn btn-default" (click)="showTicketComments(ticket)">View</button></td>
                     </tr>
                 </tbody>
@@ -153,25 +157,32 @@
         </div>
         
         <div style="margin-bottom: 20px;">
-            <h4>Device Alarm mappings</h4>
+            <h4 style="margin-bottom: 20px;">Device Alarm mappings</h4>
             <!-- Device Alarm Mappings table-->
-            <table class="table table-striped c8y-table-responsive" style="margin-bottom: 10px;">
-                <thead>
-                    <tr>
-                        <th>Device id</th>
-                        <th>Alarm type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let daMapping of paginatedDAMappings">
-                        <td>{{daMapping.deviceId}}</td>
-                        <td>{{daMapping.alarmType}}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <!-- Device Alarm Mappings table pagination -->
-            <pagination [totalItems]="daMappings.length" previousText=" "   
-            nextText=" " [itemsPerPage]="totalDAMappingsPerPage" (pageChanged)="daMappingsPageChanged($event)"></pagination>
+            <ng-container *ngIf="!tpConfig.alarmSubscription">
+                <div>
+                    Auto ticket creation is off.
+                </div>
+            </ng-container>
+            <ng-container *ngIf="tpConfig.alarmSubscription">
+                <table class="table table-striped c8y-table-responsive" style="margin-bottom: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Device id</th>
+                            <th>Alarm type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let daMapping of paginatedDAMappings">
+                            <td>{{daMapping.deviceId}}</td>
+                            <td>{{daMapping.alarmType}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Device Alarm Mappings table pagination -->
+                <pagination [totalItems]="daMappings.length" previousText=" "   
+                nextText=" " [itemsPerPage]="totalDAMappingsPerPage" (pageChanged)="daMappingsPageChanged($event)"></pagination>
+            </ng-container>
         </div>
     </div>
 </div>

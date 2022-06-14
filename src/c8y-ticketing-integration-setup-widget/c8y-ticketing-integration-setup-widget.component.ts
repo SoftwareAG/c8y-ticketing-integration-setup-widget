@@ -161,7 +161,11 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         let appResp: Promise<IResultList<IApplication>> = this.appService.listByName("ticketing");
         appResp.then((resp: IResultList<IApplication>) => {
             if(resp.res.status === 200) {
-                this.microserviceAppId = resp.data[0].id.toString();
+                if(resp.data === undefined || resp.data.length === 0) {
+                    this.alertService.danger("Ticketing Integration Setup Widget - Error fetching Ticketing application", "Ticketing Integration microservice application doesn't exist.");    
+                } else {
+                    this.microserviceAppId = resp.data[0].id.toString();
+                }
             } else {
                 this.alertService.danger("Ticketing Integration Setup Widget - Error fetching Ticketing application", resp.res.status.toString());
             }
@@ -230,6 +234,9 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                     });
 
                     this.averageCycleTime = differenceSum / closedTicketsCount;
+                    if(this.averageCycleTime === undefined || this.averageCycleTime === null || Number.isNaN(this.averageCycleTime)) {
+                        this.averageCycleTime = 0;
+                    }
                    
                     this.showPriorityChart();
                     this.showStatusChart();
@@ -499,7 +506,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     }
 
     public redirectToMicroserviceLogs() {
-        window.open("/apps/administration/index.html#/applications/"+this.microserviceAppId+"/logs", "_blank");
+        window.open("/apps/administration/index.html#/microservices/"+this.microserviceAppId+"/logs", "_blank");
     }
 
     public redirectToDevicePage(deviceId: string) {

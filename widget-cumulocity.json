@@ -3,7 +3,7 @@
     "contextPath": "c8y-ticketing-integration-setup-widget",
     "key": "c8y-ticketing-integration-setup-widget-key",
     "contentSecurityPolicy": "default-src 'self'",
-    "description": "Configure to.",
+    "description": "To configure Cumulocity IoT Ticketing Integration microservice and view tickets.",
     "icon": {
         "class": "fa fw fa-database"
     },
