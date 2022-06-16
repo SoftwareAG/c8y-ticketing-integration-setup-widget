@@ -174,7 +174,7 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let daMapping of paginatedDAMappings">
-                            <td>{{daMapping.deviceId}}</td>
+                            <td><a class="device-link" (click)="redirectToDevicePage(daMapping.deviceId)">{{daMapping.deviceId}}</a></td>
                             <td>{{daMapping.alarmType}}</td>
                         </tr>
                     </tbody>

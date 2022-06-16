@@ -15,6 +15,7 @@ import { PaginationModule } from "ngx-bootstrap/pagination";
 import { TicketCommentModal } from "./src/c8y-ticketing-integration-setup-widget/modal/ticket-comment-modal.component";
 import { ModalModule } from "ngx-bootstrap/modal";
 import { BsDatepickerModule } from "ngx-bootstrap/datepicker";
+import { DecodeHtmlPipe } from "./src/c8y-ticketing-integration-setup-widget/pipe/DecodeHtmlPipe";
 
 @NgModule({
   imports: [
@@ -34,8 +35,17 @@ import { BsDatepickerModule } from "ngx-bootstrap/datepicker";
     ModalModule,
     BsDatepickerModule
   ],
-  declarations: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig, TicketCommentModal],
-  entryComponents: [CumulocityTicketingIntegrationSetupWidget, CumulocityTicketingIntegrationSetupWidgetConfig, TicketCommentModal],
+  declarations: [
+    CumulocityTicketingIntegrationSetupWidget, 
+    CumulocityTicketingIntegrationSetupWidgetConfig, 
+    TicketCommentModal, 
+    DecodeHtmlPipe
+  ],
+  entryComponents: [
+    CumulocityTicketingIntegrationSetupWidget, 
+    CumulocityTicketingIntegrationSetupWidgetConfig, 
+    TicketCommentModal
+  ],
   providers: [{
     provide: HOOK_COMPONENTS,
     multi: true,
@@ -49,12 +59,15 @@ import { BsDatepickerModule } from "ngx-bootstrap/datepicker";
         previewImage: require("@widget-assets/img-preview.png"),
         data: {
             ng1: {
-                options: { noDeviceTarget: true, deviceTargetNotRequired: true },
-            },
-        },
+                options: { 
+                  noDeviceTarget: true, 
+                  deviceTargetNotRequired: true 
+                }
+            }
+        }
       }
     ]
-  }],
+  }]
 })
 export class AppModule extends HybridAppModule {
   constructor(protected upgrade: NgUpgradeModule) {

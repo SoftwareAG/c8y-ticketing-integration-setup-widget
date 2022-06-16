@@ -32,7 +32,6 @@ import { PageChangedEvent } from 'ngx-bootstrap/pagination';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { TicketCommentModal } from './modal/ticket-comment-modal.component';
 import * as Chart from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 @Component({
     selector: "lib-c8y-ticketing-integration-setup-widget",
@@ -324,7 +323,6 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     private showPriorityChart() {
         new Chart("priorityChart", {
             type: "pie",
-            plugins: [ChartDataLabels],
             data: {
                 labels: this.countByPriorityLabels,
                 datasets: [{
@@ -339,16 +337,6 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                 },
                 tooltips: {
                     enabled: true
-                },
-                plugins: {
-                    datalabels: {
-                        backgroundColor: '#ffffff',
-                        borderRadius: 10,
-                        color: '#111111',
-                        font: {
-                            size: 16
-                        }
-                    }
                 }
             }
         });
@@ -357,7 +345,6 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     private showStatusChart() {
         new Chart("statusChart", {
             type: "pie",
-            plugins: [ChartDataLabels],
             data: {
                 labels: this.countByStatusLabels,
                 datasets: [{
@@ -372,16 +359,6 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                 },
                 tooltips: {
                     enabled: true
-                },
-                plugins: {
-                    datalabels: {
-                        backgroundColor: '#ffffff',
-                        borderRadius: 10,
-                        color: '#111111',
-                        font: {
-                            size: 16
-                        }
-                    }
                 }
             },
         });
@@ -390,7 +367,6 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     private showDeviceChart() {
         new Chart("deviceChart", {
             type: "pie",
-            plugins: [ChartDataLabels],
             data: {
                 labels: this.countByDeviceIdLabels,
                 datasets: [{
@@ -405,16 +381,6 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
                 },
                 tooltips: {
                     enabled: true
-                },
-                plugins: {
-                    datalabels: {
-                        backgroundColor: '#ffffff',
-                        borderRadius: 10,
-                        color: '#111111',
-                        font: {
-                            size: 16
-                        }
-                    }
                 }
             },
         });
