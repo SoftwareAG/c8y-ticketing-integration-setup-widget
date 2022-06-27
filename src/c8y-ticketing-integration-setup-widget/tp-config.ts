@@ -4,6 +4,7 @@ export interface TPConfig {
     password: string;
     tenantUrl: string;
     accountId: string;
+    ticketRecordTemplateUrl: string;
     alarmSubscription: boolean;
     autoAcknowledgeAlarm: boolean;
 }

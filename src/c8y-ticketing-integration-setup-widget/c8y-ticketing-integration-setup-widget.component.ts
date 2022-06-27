@@ -20,7 +20,7 @@
  */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { IApplication, IFetchResponse, IResultList } from '@c8y/client';
+import { IApplication, IFetchResponse, IResultList, IFetchOptions } from '@c8y/client';
 import { AlertService } from '@c8y/ngx-components';
 import { FetchClient, ApplicationService } from '@c8y/ngx-components/api';
 import * as _ from 'lodash';
@@ -57,6 +57,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         username: '',
         password: '',
         accountId: '',
+        ticketRecordTemplateUrl: '',
         alarmSubscription: false,
         autoAcknowledgeAlarm: false
     };
@@ -117,7 +118,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         tpConfigFetchClient.then((resp: IFetchResponse) => {
             if(resp.status === 200) {
                 resp.json().then((jsonResp) => {
-                    this.tpConfig = jsonResp;
+                    this.tpConfig = jsonResp.record;
                     if(this.tpConfig.alarmSubscription) {
                         this.initialiseDAMappings();
                     }
@@ -142,8 +143,8 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         daMappingsFetchClient.then((resp: IFetchResponse) => {
             if(resp.status === 200) {
                 resp.json().then((jsonResp) => {
-                    this.daMappings = jsonResp;
-                    this.paginatedDAMappings = jsonResp.slice(0, this.totalDAMappingsPerPage);
+                    this.daMappings = jsonResp.records;
+                    this.paginatedDAMappings = this.daMappings.slice(0, this.totalDAMappingsPerPage);
                 }).catch((err) => {
                     this.alertService.danger("Ticketing Integration Setup Widget - Error accessing daMappings response body as JSON", err);
                 });
@@ -178,17 +179,16 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         let ticketsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/tickets?pageSize="+this.maxTickets);
         ticketsFetchClient.then((resp) => {
             if(resp.status === 200) {
-                resp.json().then((tickets: Ticket[]) => {
-                    
-                    this.tickets = tickets;
-                    this.searchedTickets = tickets;
-                    this.paginatedTickets = this.searchedTickets.slice(0, this.totalTicketsPerPage);
+                resp.json().then((jsonResp: any) => {
 
+                    this.tickets = jsonResp.records;
+                    this.searchedTickets = this.tickets;
+                    this.paginatedTickets = this.searchedTickets.slice(0, this.totalTicketsPerPage);
 
                     let differenceSum = 0;
                     let closedTicketsCount = 0;
 
-                    tickets.forEach((ticket) => {
+                    this.tickets.forEach((ticket) => {
                         let statusFoundIndex = this.findEntryInStatus(ticket.status);
                         if(statusFoundIndex === -1) {
                             this.ticketFilter.status.push({
@@ -289,7 +289,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
             if(resp.status === 200) {
                 resp.json().then((jsonResp) => {
                     let message = {
-                        comments: jsonResp
+                        comments: jsonResp.records
                     };
                     this.modalService.show(TicketCommentModal, { class: 'c8y-wizard', initialState: {message} });
                 }).catch((err) => {
@@ -304,7 +304,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     }
 
     public getMicroserviceHealth(): void {
-        let healthFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/health")
+        let healthFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/health");
         healthFetchClient.then((resp: IFetchResponse) => {
             if(resp.status === 200) {
                 resp.json().then((jsonResp) => {
@@ -477,6 +477,42 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
 
     public redirectToDevicePage(deviceId: string) {
         window.open("/apps/devicemanagement/index.html#/device/"+deviceId+"/device-info", "_blank");
+    }
+
+    public deleteTicketCreationRecords(): void {
+        const fetchOptions: IFetchOptions = {
+            method: 'DELETE'
+        };
+        let fetchResp: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/admin/ticketCreationRecords", fetchOptions);
+        fetchResp.then((resp: IFetchResponse) => {
+            if(resp.status === 200) {
+                resp.json().then((jsonResp) => {
+                    this.alertService.success("Ticket Creation Records deleted successfully.");
+                });
+            } else {
+                this.alertService.danger("Ticketing Integration Setup Widget - Error deleting Ticket Creation Records", resp.status.toString());
+            }
+        }).catch((err) => {
+            this.alertService.danger("Ticketing Integration Setup Widget - Error fetching microservice health", err);
+        });
+    }
+
+    public deleteConfigManagedObject(): void {
+        const fetchOptions: IFetchOptions = {
+            method: 'DELETE'
+        };
+        let fetchResp: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/admin/configManagedObject", fetchOptions);
+        fetchResp.then((resp: IFetchResponse) => {
+            if(resp.status === 200) {
+                resp.json().then((jsonResp) => {
+                    this.alertService.success("Config Managed Object successfully.");
+                });
+            } else {
+                this.alertService.danger("Ticketing Integration Setup Widget - Error deleting Config Managed Object", resp.status.toString());
+            }
+        }).catch((err) => {
+            this.alertService.danger("Ticketing Integration Setup Widget - Error deleting Config Managed Object", err);
+        });
     }
 
 }

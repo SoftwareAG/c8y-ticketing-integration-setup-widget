@@ -30,6 +30,7 @@ import { TicketCommentModal } from "./modal/ticket-comment-modal.component";
 import { ModalModule } from "ngx-bootstrap/modal";
 import { BsDatepickerModule } from "ngx-bootstrap/datepicker";
 import { DecodeHtmlPipe } from "./pipe/DecodeHtmlPipe";
+import { TicketIdReplacementPipe } from "./pipe/TicketIdReplacementPipe";
 
 @NgModule({
     imports: [
@@ -44,7 +45,8 @@ import { DecodeHtmlPipe } from "./pipe/DecodeHtmlPipe";
         CumulocityTicketingIntegrationSetupWidget, 
         CumulocityTicketingIntegrationSetupWidgetConfig, 
         TicketCommentModal, 
-        DecodeHtmlPipe
+        DecodeHtmlPipe,
+        TicketIdReplacementPipe
     ],
     entryComponents: [
         CumulocityTicketingIntegrationSetupWidget, 

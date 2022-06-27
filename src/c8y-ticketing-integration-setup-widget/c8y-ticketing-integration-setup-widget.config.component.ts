@@ -36,7 +36,8 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         ticketsPageSize: 5,
         daMappingsPageSize: 5,
         chartColors: ["#1776bf"],
-        maxTickets: 100
+        maxTickets: 100,
+        showComments: false
     };
 
     public tpConfig: TPConfig = {
@@ -45,6 +46,7 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         username: '',
         password: '',
         accountId: '',
+        ticketRecordTemplateUrl: '',
         alarmSubscription: false,
         autoAcknowledgeAlarm: false
     };
@@ -74,7 +76,7 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         tpConfigFetchClient.then((resp: IFetchResponse) => {
             if(resp.status === 200) {
                 resp.json().then((jsonResp) => {
-                    this.tpConfig = jsonResp;
+                    this.tpConfig = jsonResp.record;
 
                     this.tpConfigSaved = true;
 
@@ -103,7 +105,7 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         daMappingsFetchClient.then((resp: IFetchResponse) => {
             if(resp.status === 200) {
                 resp.json().then((jsonResp) => {
-                    this.daMappings = jsonResp;
+                    this.daMappings = jsonResp.records;
                 }).catch((err) => {
                     this.alertService.danger("Ticketing Integration Setup Widget Config - Error accessing daMappings response body as JSON", err)
                 });
@@ -116,11 +118,19 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
     }
 
     public isTPConfigValid(): boolean {
-        return this.tpConfig.name !== undefined && this.tpConfig.name !== null && this.tpConfig.name !== ""
+        if (this.tpConfig.name !== undefined && this.tpConfig.name !== null && this.tpConfig.name !== ""
         && this.tpConfig.password !== undefined && this.tpConfig.password !== null && this.tpConfig.password !== ""
         && this.tpConfig.username !== undefined && this.tpConfig.username !== null && this.tpConfig.username !== ""
-        && this.tpConfig.tenantUrl !== undefined && this.tpConfig.tenantUrl !== null && this.tpConfig.tenantUrl !== ""
-        && this.tpConfig.accountId !== undefined && this.tpConfig.accountId !== null && this.tpConfig.accountId !== ""
+        && this.tpConfig.tenantUrl !== undefined && this.tpConfig.tenantUrl !== null && this.tpConfig.tenantUrl !== "") {
+            if(this.tpConfig.name === "AGILEAPPS") {
+                if(this.tpConfig.accountId !== undefined && this.tpConfig.accountId !== null && this.tpConfig.accountId !== "") {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     public addDAMapping() {

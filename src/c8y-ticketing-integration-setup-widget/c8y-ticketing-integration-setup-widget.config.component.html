@@ -4,6 +4,7 @@
             <label>Platform</label>
             <select class="form-control" [(ngModel)]="tpConfig.name" required >
                 <option value="AGILEAPPS">webMethods AgileApps</option>
+                <option value="EXTERNAL_REST">External REST APIs</option>
             </select>
         </div>
     </div>
@@ -25,12 +26,20 @@
             <input type="password" class="form-control" [(ngModel)]="tpConfig.password" required />
         </div>
     </div>
-    <div class="col-lg-6">
+    <div class="col-lg-12">
         <div class="form-group">
-            <label>Account id</label>
-            <input type="text" class="form-control" [(ngModel)]="tpConfig.accountId" required />
+            <label>Ticket record template url</label>
+            <input type="text" class="form-control" [(ngModel)]="tpConfig.ticketRecordTemplateUrl" placeholder="https://tenantname/tickets/{id}/record" required />
         </div>
     </div>
+    <ng-container *ngIf="tpConfig.name === 'AGILEAPPS'">
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Account id</label>
+                <input type="text" class="form-control" [(ngModel)]="tpConfig.accountId" required />
+            </div>
+        </div>
+    </ng-container>
     <div class="col-lg-12">
         <div class="form-group">
             <label class="c8y-checkbox">
@@ -49,11 +58,14 @@
             </label>
         </div>
     </div>
-    
+
 </div>
 <div class="row">
     <div class="col-lg-12">
         <button class="btn btn-primary" [disabled]="!isTPConfigValid()" (click)="saveTPConfig()">Save configuration</button>
+        <ng-container *ngIf="tpConfig.name !== 'AGILEAPPS'">
+            <a class="btn btn-emphasis" target="_blank" href="https://github.com/SoftwareAG/c8y-ticketing-integr…tion-setup-widget/assets/apis-swagger.yaml?raw=true">Download Swagger</a>
+        </ng-container>
     </div>
 </div>     
 <ng-container *ngIf="tpConfigSaved && tpConfig.alarmSubscription">
@@ -117,6 +129,17 @@
                     <div class="form-group">
                         <label>Mappings page size</label>
                         <input type="number" class="form-control" [(ngModel)]="widgetConfig.daMappingsPageSize" (change)="updateConfig()" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label class="c8y-checkbox">
+                            <input type="checkbox" [(ngModel)]="widgetConfig.showComments" (change)="updateConfig()" />
+                            <span></span>
+                            <span>Show comments</span>
+                        </label>
                     </div>
                 </div>
             </div>

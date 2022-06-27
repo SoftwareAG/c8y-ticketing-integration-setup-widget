@@ -28,7 +28,7 @@ module.exports = {
                 options: {
                     limit: 8192,
                     publicPath: `/apps/${require('./widget-cumulocity').contextPath}/`
-                },
+                }
             }
         ]
     },
