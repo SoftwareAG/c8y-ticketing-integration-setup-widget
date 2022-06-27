@@ -64,7 +64,7 @@
     <div class="col-lg-12">
         <button class="btn btn-primary" [disabled]="!isTPConfigValid()" (click)="saveTPConfig()">Save configuration</button>
         <ng-container *ngIf="tpConfig.name !== 'AGILEAPPS'">
-            <a class="btn btn-emphasis" target="_blank" href="https://github.com/SoftwareAG/c8y-ticketing-integr…tion-setup-widget/assets/apis-swagger.yaml?raw=true">Download Swagger</a>
+            <button class="btn btn-emphasis" target="_blank" (click)="downloadSwaggerFile()">Download Swagger</button>
         </ng-container>
     </div>
 </div>     

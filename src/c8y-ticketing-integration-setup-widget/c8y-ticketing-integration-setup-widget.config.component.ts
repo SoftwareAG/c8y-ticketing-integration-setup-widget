@@ -15,6 +15,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License. 
  */
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { IFetchOptions, IFetchResponse } from '@c8y/client';
 import { AlertService } from '@c8y/ngx-components';
@@ -55,7 +56,7 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
     
     public daMappings: DAMapping[] = [];
 
-    constructor(private fetchClient: FetchClient, private alertService: AlertService) {}
+    constructor(private fetchClient: FetchClient, private alertService: AlertService, private httpClient: HttpClient) {}
 
     ngOnInit(): void {
         try {
@@ -225,6 +226,24 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
 
     trackByFn(index, item) {
         return index;  
+    }
+
+    public downloadSwaggerFile() {
+        this.httpClient.get("https://raw.githubusercontent.com/SoftwareAG/c8y-ticketing-integration-setup-widget/master/src/c8y-ticketing-integration-setup-widget/assets/apis-swagger.yaml", {
+            observe: "response", responseType: "blob" 
+        }).subscribe((resp) => {
+            let url = window.URL.createObjectURL(resp.body);
+            let a = document.createElement('a');
+            document.body.appendChild(a);
+            a.setAttribute('style', 'display: none');
+            a.href = url;
+            a.download = "ticketing-integration-swagger.yaml";
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }, (error: HttpErrorResponse) => {
+            this.alertService.danger("Ticketing Integration Setup Widget Config - Unable to download swagger file.", error.message);
+        });
     }
 
     ngOnDestroy(): void {
