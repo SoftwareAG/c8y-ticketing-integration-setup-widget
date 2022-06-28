@@ -118,6 +118,10 @@
                         <input class="form-control" placeholder="Creation date" bsDatepicker [bsConfig]="{ isAnimated: true }" [(ngModel)]="ticketFilter.creationDate" (ngModelChange)="creationDateFilterChanged()" />
                       </div>
                 </div>
+                <!-- Refresh button -->
+                <div style="margin-right: 40px;">
+                    <button type="button" class="btn btn-primary" title="Refresh tickets" (click)="getAllTickets()">Refresh</button>
+                </div>
             </div>
             <!-- Tickets table -->
             <table class="table table-striped c8y-table-responsive" style="margin-bottom: 10px;">

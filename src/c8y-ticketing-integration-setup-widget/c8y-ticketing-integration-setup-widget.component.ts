@@ -175,7 +175,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     }
    
     
-    private getAllTickets(): void {
+    public getAllTickets(): void {
         let ticketsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/tickets?pageSize="+this.maxTickets);
         ticketsFetchClient.then((resp) => {
             if(resp.status === 200) {
