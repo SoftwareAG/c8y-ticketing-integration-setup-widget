@@ -90,7 +90,11 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         status: "Checking..."
     };
 
-    constructor(private fetchClient: FetchClient, private alertService: AlertService, private modalService: BsModalService, private appService: ApplicationService) {
+    constructor(
+        private fetchClient: FetchClient,
+        private alertService: AlertService,
+        private modalService: BsModalService, 
+        private appService: ApplicationService) {
     }
 
     ngOnInit(): void {
@@ -175,7 +179,7 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
     }
    
     
-    public getAllTickets(): void {
+    private getAllTickets(): void {
         let ticketsFetchClient: Promise<IFetchResponse> = this.fetchClient.fetch("/service/ticketing/tickets?pageSize="+this.maxTickets);
         ticketsFetchClient.then((resp) => {
             if(resp.status === 200) {
@@ -513,6 +517,20 @@ export class CumulocityTicketingIntegrationSetupWidget implements OnInit {
         }).catch((err) => {
             this.alertService.danger("Ticketing Integration Setup Widget - Error deleting Config Managed Object", err);
         });
+    }
+
+    public refreshTickets() {
+        this.countByDeviceIdDatapoints = [];
+        this.countByDeviceIdLabels = [];
+        this.countByPriorityDatapoints = [];
+        this.countByPriorityLabels = [];
+        this.ticketFilter.priority = [];
+        this.countByStatusDatapoints = [];
+        this.countByStatusLabels = [];
+        this.ticketFilter.status = [];
+        this.ticketFilter.creationDate = null;
+        this.ticketFilter.searchText = "";
+        this.getAllTickets();
     }
 
 }

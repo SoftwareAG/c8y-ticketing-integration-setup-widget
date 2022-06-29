@@ -31,7 +31,13 @@
                 <a class="btn btn-xs btn-danger" (click)="deleteTicketCreationRecords()">Delete All Ticket Creation Records</a>
             </div>
             <div>
-                <h4 style="margin-bottom: 20px;">Microservice</h4>
+                <h4 style="margin-bottom: 20px;">
+                    Microservice
+                    <!-- Microservice logs button -->
+                    <button class="btn-clean btn-icon" (click)="redirectToMicroserviceLogs()" title="View microservice logs">
+                        <i c8yicon="logs" class="dlt-c8y-icon-logs"></i>
+                    </button>
+                </h4>
                 <!-- Microservice health status -->
                 <div class="d-flex">
                     <div style="margin-right: 40px;">
@@ -78,10 +84,6 @@
                             </span>
                         </p>
                     </div>
-                    <div>
-                        <!-- Microservice logs button -->
-                        <button class="btn btn-xs btn-primary" (click)="redirectToMicroserviceLogs()" title="View microservice logs">View logs</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -120,7 +122,7 @@
                 </div>
                 <!-- Refresh button -->
                 <div style="margin-right: 40px;">
-                    <button type="button" class="btn btn-primary" title="Refresh tickets" (click)="getAllTickets()">Refresh</button>
+                    <button type="button" class="btn btn-primary" title="Refresh tickets" (click)="refreshTickets()">Refresh</button>
                 </div>
             </div>
             <!-- Tickets table -->
