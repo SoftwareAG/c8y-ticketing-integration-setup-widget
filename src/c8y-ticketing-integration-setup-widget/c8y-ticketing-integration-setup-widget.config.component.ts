@@ -228,24 +228,6 @@ export class CumulocityTicketingIntegrationSetupWidgetConfig implements OnInit, 
         return index;  
     }
 
-    public downloadSwaggerFile() {
-        this.httpClient.get("https://raw.githubusercontent.com/SoftwareAG/c8y-ticketing-integration-setup-widget/master/src/c8y-ticketing-integration-setup-widget/assets/apis-swagger.yaml", {
-            observe: "response", responseType: "blob" 
-        }).subscribe((resp) => {
-            let url = window.URL.createObjectURL(resp.body);
-            let a = document.createElement('a');
-            document.body.appendChild(a);
-            a.setAttribute('style', 'display: none');
-            a.href = url;
-            a.download = "ticketing-integration-swagger.yaml";
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
-        }, (error: HttpErrorResponse) => {
-            this.alertService.danger("Ticketing Integration Setup Widget Config - Unable to download swagger file.", error.message);
-        });
-    }
-
     ngOnDestroy(): void {
         //unsubscribe from observables here
     }

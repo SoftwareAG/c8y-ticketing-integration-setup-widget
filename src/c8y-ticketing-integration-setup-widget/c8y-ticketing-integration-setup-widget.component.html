@@ -1,4 +1,62 @@
 <div style="margin-left: 15px; margin-right: 15px;">
+    <h4 style="margin-bottom: 20px;">
+        Microservice
+        <!-- Microservice logs button -->
+        <button class="btn-clean btn-icon" (click)="redirectToMicroserviceLogs()" title="View microservice logs">
+            <i c8yicon="logs" class="dlt-c8y-icon-logs"></i>
+        </button>
+    </h4>
+    <div class="d-flex" style="margin-bottom: 20px;">
+        <div style="margin-right: 40px;">
+            <p>
+                <b>Status </b>
+                <span *ngIf="microserviceHealth && microserviceHealth.status === 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.status}}" style="color: green;"></i>
+                </span>
+                <span *ngIf="microserviceHealth && microserviceHealth.status !== 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.status}}" style="color: red;"></i>
+                </span>
+            </p>
+        </div>
+        <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
+            <p>
+                <b>Disk space </b>
+                <span *ngIf="microserviceHealth.components.diskSpace.status === 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.diskSpace.status}}" style="color: green;"></i>
+                </span>
+                <span *ngIf="microserviceHealth.components.diskSpace.status !== 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.diskSpace.status}}" style="color: red;"></i>
+                </span>
+            </p>
+        </div>
+        <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
+            <p>
+                <b>Heap memory </b>
+                <span *ngIf="microserviceHealth.components.heapMemory.status === 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.heapMemory.status}}" style="color: green;"></i>
+                </span>
+                <span *ngIf="microserviceHealth.components.heapMemory.status !== 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.heapMemory.status}}" style="color: red;"></i>
+                </span>
+            </p>
+        </div>
+        <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
+            <p>
+                <b>Non-heap memory </b>
+                <span *ngIf="microserviceHealth.components.nonHeapMemory.status === 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.nonHeapMemory.status}}" style="color: green;"></i>
+                </span>
+                <span *ngIf="microserviceHealth.components.nonHeapMemory.status !== 'UP'">
+                    <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.nonHeapMemory.status}}" style="color: red;"></i>
+                </span>
+            </p>
+        </div>
+        <div class="m-auto"></div>
+        <div>
+            <a class="btn btn-xs btn-danger" (click)="deleteConfigManagedObject()">Delete Config Managed Object</a>
+            <a class="btn btn-xs btn-danger" (click)="deleteTicketCreationRecords()">Delete All Ticket Creation Records</a>
+        </div>
+    </div>
     <div class="d-flex" style="margin-bottom: 20px;">
         <div style="margin-right: 40px;">
             <h4 style="margin-bottom: 20px;">Tickets by priority</h4>
@@ -19,73 +77,44 @@
             <canvas id="deviceChart"></canvas>
         </div>
         <div style="margin-right: 40px;">
-            <h4 style="margin-bottom: 20px;">Overall average cycle time</h4>
-            <!-- Average cycle time -->
-            <div style="font-size: 50px;" *ngIf="tickets.length === 0">N.A.</div>
-            <div style="font-size: 50px;" *ngIf="tickets.length !== 0">{{averageCycleTime | number : '1.0-1'}} hrs</div>
-        </div>
-        <div class="m-auto"></div>
-        <div>
-            <div style="margin-bottom: 20px;">
-                <a class="btn btn-xs btn-danger" (click)="deleteConfigManagedObject()">Delete Config Managed Object</a>
-                <a class="btn btn-xs btn-danger" (click)="deleteTicketCreationRecords()">Delete All Ticket Creation Records</a>
-            </div>
-            <div>
-                <h4 style="margin-bottom: 20px;">
-                    Microservice
-                    <!-- Microservice logs button -->
-                    <button class="btn-clean btn-icon" (click)="redirectToMicroserviceLogs()" title="View microservice logs">
-                        <i c8yicon="logs" class="dlt-c8y-icon-logs"></i>
-                    </button>
-                </h4>
-                <!-- Microservice health status -->
-                <div class="d-flex">
-                    <div style="margin-right: 40px;">
-                        <p>
-                            <b>Status </b>
-                            <span *ngIf="microserviceHealth && microserviceHealth.status === 'UP'">
-                                <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.status}}" style="color: green;"></i>
-                            </span>
-                            <span *ngIf="microserviceHealth && microserviceHealth.status !== 'UP'">
-                                <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.status}}" style="color: red;"></i>
-                            </span>
-                        </p>
-                    </div>
-                    <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
-                        <p>
-                            <b>Disk space </b>
-                            <span *ngIf="microserviceHealth.components.diskSpace.status === 'UP'">
-                                <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.diskSpace.status}}" style="color: green;"></i>
-                            </span>
-                            <span *ngIf="microserviceHealth.components.diskSpace.status !== 'UP'">
-                                <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.diskSpace.status}}" style="color: red;"></i>
-                            </span>
-                        </p>
-                    </div>
-                    <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
-                        <p>
-                            <b>Heap memory </b>
-                            <span *ngIf="microserviceHealth.components.heapMemory.status === 'UP'">
-                                <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.heapMemory.status}}" style="color: green;"></i>
-                            </span>
-                            <span *ngIf="microserviceHealth.components.heapMemory.status !== 'UP'">
-                                <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.heapMemory.status}}" style="color: red;"></i>
-                            </span>
-                        </p>
-                    </div>
-                    <div *ngIf="microserviceHealth.status === 'UP'" style="margin-right: 40px;">
-                        <p>
-                            <b>Non-heap memory </b>
-                            <span *ngIf="microserviceHealth.components.nonHeapMemory.status === 'UP'">
-                                <i class="dlt-c8y-icon-arrow-circle-up" title="{{microserviceHealth.components.nonHeapMemory.status}}" style="color: green;"></i>
-                            </span>
-                            <span *ngIf="microserviceHealth.components.nonHeapMemory.status !== 'UP'">
-                                <i class="dlt-c8y-icon-arrow-circle-down" title="{{microserviceHealth.components.nonHeapMemory.status}}" style="color: red;"></i>
-                            </span>
-                        </p>
-                    </div>
+            <h4 style="margin-bottom: 20px;">Device Alarm mappings</h4>
+            <!-- Device Alarm Mappings table-->
+            <ng-container *ngIf="!tpConfig.alarmSubscription">
+                <div>
+                    Automatic ticket creation is off.
                 </div>
-            </div>
+            </ng-container>
+            <ng-container *ngIf="tpConfig.alarmSubscription">
+                <table class="table table-striped c8y-table-responsive" style="margin-bottom: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Device id</th>
+                            <th>Alarm type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let daMapping of paginatedDAMappings">
+                            <td><a class="device-link" (click)="redirectToDevicePage(daMapping.deviceId)">{{daMapping.deviceId}}</a></td>
+                            <td>{{daMapping.alarmType}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Device Alarm Mappings table pagination -->
+                <pagination [totalItems]="daMappings.length" previousText=" "   
+                nextText=" " [itemsPerPage]="totalDAMappingsPerPage" (pageChanged)="daMappingsPageChanged($event)"></pagination>
+            </ng-container>
+        </div>
+    </div>
+    <h4 style="margin-bottom: 10px;">Overall average cycle time</h4>
+    <div class="d-flex" style="margin-bottom: 20px;">
+        <div>
+            <!-- Average cycle time -->
+            <ng-container *ngIf="tickets.length === 0">
+                <div style="font-size: 40px;">N.A.</div>
+            </ng-container>
+            <ng-container *ngIf="tickets.length !== 0">
+                <div style="font-size: 40px;">{{averageCycleTime | number : '1.0-1'}} hrs</div>
+            </ng-container>
         </div>
     </div>
     <div class="d-flex flex-wrap">
@@ -169,32 +198,7 @@
         </div>
         
         <div style="margin-bottom: 20px;">
-            <h4 style="margin-bottom: 20px;">Device Alarm mappings</h4>
-            <!-- Device Alarm Mappings table-->
-            <ng-container *ngIf="!tpConfig.alarmSubscription">
-                <div>
-                    Auto ticket creation is off.
-                </div>
-            </ng-container>
-            <ng-container *ngIf="tpConfig.alarmSubscription">
-                <table class="table table-striped c8y-table-responsive" style="margin-bottom: 10px;">
-                    <thead>
-                        <tr>
-                            <th>Device id</th>
-                            <th>Alarm type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let daMapping of paginatedDAMappings">
-                            <td><a class="device-link" (click)="redirectToDevicePage(daMapping.deviceId)">{{daMapping.deviceId}}</a></td>
-                            <td>{{daMapping.alarmType}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <!-- Device Alarm Mappings table pagination -->
-                <pagination [totalItems]="daMappings.length" previousText=" "   
-                nextText=" " [itemsPerPage]="totalDAMappingsPerPage" (pageChanged)="daMappingsPageChanged($event)"></pagination>
-            </ng-container>
+            
         </div>
     </div>
 </div>

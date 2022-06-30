@@ -23,7 +23,7 @@ This widget is dependent on Cumulocity IoT Ticketing Integration microservice. I
         - `Password` is password of AgileApps tenant account.
         - `Account id` is customer account record id to which all the tickets created will be related to.
     - Choose `External REST APIs` to integrate with any ticketing platform using custom integration.
-        - `Tenant url` is base url of custom APIs. It must not end on '/'.
+        - `Tenant url` is base url of custom APIs. It must not end with '/'.
         - `Username` is username of user account to access the APIs using basic authentication.
         - `Password` is password of user account to access the APIs using basic authentication.
         - `Download Swagger` to download the swagger file. Swagger file define the APIs that are expected by Ticketing Integration Microservice.

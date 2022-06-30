@@ -10,7 +10,7 @@
     "manifest": {
         "noAppSwitcher": true,
         "requiredPlatformVersion": "“>=1011.0.20",
-        "version":"1.0.1",
+        "version":"10.0.1",
         "author":"Software AG, Global Presales",
         "description":"Configure to.",
         "license": "Apache 2.0"
