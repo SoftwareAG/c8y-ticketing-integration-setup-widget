@@ -1,3 +1,5 @@
+For Cumulocity IoT version >= 10.16 and Application Builder version >= 2.0.0, please refer to https://github.com/SoftwareAG/c8y-ticketing-integration-plugin
+
 # Ticketing Integration Setup Widget for Cumulocity IoT
 
 This widget is dependent on Cumulocity IoT Ticketing Integration microservice. It allows to configure the microservice and see the tickets list and charts from ticketing platform.
